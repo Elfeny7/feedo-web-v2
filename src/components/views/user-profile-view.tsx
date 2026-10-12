@@ -1,0 +1,311 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { PostItem } from "@/components/widgets/post-item";
+import { Avatar } from "@/components/ui/avatar";
+import { ChevronLeftIcon, DocumentIcon } from "@/components/icons";
+import { AuthGate } from "@/components/auth/auth-gate";
+import { AuthModal, AuthModalAction } from "@/components/auth/auth-modal";
+// import { EditProfileModal } from "@/components/modals/edit-profile-modal";
+import { useUserProfile } from "@/hooks/use-user-profile";
+import { useUserPosts } from "@/hooks/use-user-posts";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useToggleFollow } from "@/hooks/use-toggle-follow";
+import { useToggleLike } from "@/hooks/use-toggle-like";
+import { PostItemSkeleton } from "@/components/widgets/post-item-skeleton";
+import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+
+export function UserProfileView({ handle }: { handle: string }) {
+    const router = useRouter();
+    const { data: user } = useCurrentUser();
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const [authModal, setAuthModal] = useState<{
+        isOpen: boolean;
+        action: AuthModalAction;
+        targetName?: string;
+    }>({
+        isOpen: false,
+        action: "like",
+    });
+
+    const userSelfHandle = user?.handle ? user.handle.toLowerCase() : null;
+    const isSelf = Boolean(user && userSelfHandle && userSelfHandle === handle.toLowerCase());
+    const isGuest = !user;
+
+    const { data: profile, isLoading: isLoadingProfile } = useUserProfile(handle);
+    const { mutate: toggleFollow } = useToggleFollow();
+    const { mutate: toggleLike } = useToggleLike();
+
+    const {
+        data,
+        isLoading: isLoadingPosts,
+        isError,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useUserPosts(handle);
+
+    const loadMoreRef = useInfiniteScroll({
+        hasNextPage,
+        isFetchingNextPage,
+        fetchNextPage,
+    });
+
+    const posts = data?.pages.flatMap((page) => page?.data?.data ?? [],) ?? [];
+
+    const handleFollowClick = () => {
+        if (isGuest) {
+            setAuthModal({
+                isOpen: true,
+                action: "follow",
+                targetName: profile?.name,
+            });
+            return;
+        }
+        toggleFollow(handle);
+    };
+
+    const handleLikeClick = (index: number) => {
+        if (isGuest) {
+            setAuthModal({
+                isOpen: true,
+                action: "like",
+                targetName: profile?.name,
+            });
+            return;
+        }
+        toggleLike(index);
+    };
+
+    return (
+        <>
+            {/* Header */}
+            <header className="sticky top-0 z-10 backdrop-blur-md bg-background/80 border-b border-border px-4 sm:px-6 h-15 flex items-center gap-4">
+                <button
+                    onClick={() => router.back()}
+                    className="p-2 -ml-2 rounded-full hover:bg-muted transition-colors cursor-pointer"
+                    aria-label="Back"
+                >
+                    <ChevronLeftIcon className="w-5 h-5" />
+                </button>
+                {isLoadingProfile ? (
+                    <div className="h-5 w-28 bg-muted animate-pulse rounded-md"></div>
+                ) : (
+                    <h1 className="text-xl font-bold tracking-tight">{profile?.name}</h1>
+                )}
+            </header>
+
+            {/* Cover Image */}
+            <div className="h-32 sm:h-48 bg-linear-to-r from-teal-500 to-emerald-400 w-full relative"></div>
+
+            {/* Profile Info */}
+            <div className="px-4 sm:px-6 pb-8 border-b border-border relative flex flex-col items-start text-left">
+                {isLoadingProfile ? (
+                    <div className="w-full flex flex-col items-center">
+                        {/* Edit / Action Button Skeleton */}
+                        {isSelf ? (
+                            <div className="absolute top-3 right-4 sm:top-4 sm:right-6 h-8 w-16 sm:w-20 bg-muted animate-pulse rounded-full z-10"></div>
+                        ) : null}
+
+                        {/* Avatar Skeleton */}
+                        <div className="self-center w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-background mt-[-12%] sm:mt-[-16%] relative z-0 mb-3 bg-muted animate-pulse shadow-sm"></div>
+
+                        {/* Name and Handle Skeleton */}
+                        <div className="flex flex-col self-center items-center text-center w-full gap-2">
+                            <div className="h-6 w-32 bg-muted animate-pulse rounded-md"></div>
+                            <div className="h-4 w-24 bg-muted animate-pulse rounded-md"></div>
+                        </div>
+
+                        {/* Bio Skeleton */}
+                        <div className="mt-4 flex flex-col items-center w-full gap-2">
+                            <div className="h-4 w-64 max-w-[80%] bg-muted animate-pulse rounded-md"></div>
+                            <div className="h-4 w-48 max-w-[60%] bg-muted animate-pulse rounded-md"></div>
+                        </div>
+
+                        {/* Stats Skeleton */}
+                        <div className="flex justify-evenly items-center w-full mt-6 mb-2">
+                            <div className="flex flex-col items-center w-20 gap-2">
+                                <div className="h-5 w-8 bg-muted animate-pulse rounded-md"></div>
+                                <div className="h-3 w-16 bg-muted animate-pulse rounded-md"></div>
+                            </div>
+                            <div className="w-px bg-border/80 h-8"></div>
+                            <div className="flex flex-col items-center w-20 gap-2">
+                                <div className="h-5 w-8 bg-muted animate-pulse rounded-md"></div>
+                                <div className="h-3 w-16 bg-muted animate-pulse rounded-md"></div>
+                            </div>
+                            <div className="w-px bg-border/80 h-8"></div>
+                            <div className="flex flex-col items-center w-20 gap-2">
+                                <div className="h-5 w-8 bg-muted animate-pulse rounded-md"></div>
+                                <div className="h-3 w-16 bg-muted animate-pulse rounded-md"></div>
+                            </div>
+                        </div>
+
+                        {/* Follow Button Skeleton */}
+                        {!isSelf && (
+                            <div className="w-full flex justify-center mt-2">
+                                <div className="h-10 w-32 bg-muted animate-pulse rounded-full"></div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <>
+                        {/* Tombol Edit Profil (Hanya tampil jika membuka profil milik sendiri) */}
+                        {isSelf && (
+                            <>
+                                <button
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    className="absolute top-3 right-4 sm:top-4 sm:right-6 font-bold py-1.5 px-4 rounded-full border border-border text-foreground hover:bg-muted transition-colors text-sm z-10 hidden sm:block cursor-pointer"
+                                >
+                                    Edit profile
+                                </button>
+                                <button
+                                    onClick={() => setIsEditModalOpen(true)}
+                                    className="absolute top-3 right-4 font-bold py-1.5 px-3 rounded-full border border-border text-foreground hover:bg-muted transition-colors text-xs z-10 sm:hidden cursor-pointer"
+                                >
+                                    Edit profile
+                                </button>
+                            </>
+                        )}
+
+                        {/* Avatar */}
+                        <Avatar
+                            name={profile?.name || "?"}
+                            className="self-center w-24 h-24 sm:w-32 sm:h-32 border-4 border-background mt-[-12%] sm:mt-[-16%] relative z-0 mb-3 shadow-sm text-4xl"
+                        />
+
+                        {/* Name and Handle */}
+                        <div className="flex flex-col self-center items-center text-center w-full">
+                            <h2 className="text-xl font-extrabold tracking-tight">{profile?.name}</h2>
+                            <span className="text-muted-foreground text-[15px]">@{profile?.handle}</span>
+                        </div>
+
+                        {/* Bio */}
+                        {profile?.bio ? (
+                            <p className="mt-3 text-[15px] leading-normal text-foreground max-w-md self-center text-center">
+                                {profile.bio}
+                            </p>
+                        ) : null}
+
+                        {/* Stats */}
+                        <div className="flex justify-evenly items-center w-full mt-6 mb-2">
+                            <div className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity w-20">
+                                <span className="font-extrabold text-lg text-foreground">{profile?.followings_count ?? 0}</span>
+                                <span className="text-[13px] text-muted-foreground mt-0.5 font-medium">Following</span>
+                            </div>
+
+                            <div className="w-px bg-border/80 h-8"></div>
+
+                            <div className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity w-20">
+                                <span className="font-extrabold text-lg text-foreground">{profile?.followers_count ?? "0"}</span>
+                                <span className="text-[13px] text-muted-foreground mt-0.5 font-medium">Followers</span>
+                            </div>
+
+                            <div className="w-px bg-border/80 h-8"></div>
+
+                            <div className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity w-20">
+                                <span className="font-extrabold text-lg text-foreground">{profile?.posts_count ?? 0}</span>
+                                <span className="text-[13px] text-muted-foreground mt-0.5 font-medium">Posts</span>
+                            </div>
+                        </div>
+
+                        {/* Tombol Follow / Following (Hanya tampil jika membuka profil pengguna lain) */}
+                        {!isSelf && profile && (
+                            <div className="w-full flex justify-center mt-2">
+                                <button
+                                    onClick={handleFollowClick}
+                                    className={`px-8 py-2 rounded-full font-bold transition-all cursor-pointer ${profile.is_followed
+                                        ? "bg-transparent border border-border hover:border-destructive hover:text-destructive hover:bg-destructive/10 text-foreground"
+                                        : "bg-foreground text-background hover:bg-foreground/90"
+                                        }`}
+                                >
+                                    {profile.is_followed ? "Following" : "Follow"}
+                                </button>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+
+            {/* Feed Posts */}
+            <div className="flex flex-col">
+                {isLoadingPosts ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <PostItemSkeleton key={i} />
+                    ))
+                ) : posts.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border-b border-border">
+                        <div className="w-20 h-20 mb-4 rounded-full bg-muted flex items-center justify-center opacity-70">
+                            <DocumentIcon className="w-8 h-8" />
+                        </div>
+                        <h3 className="text-xl font-bold text-foreground mb-2">No posts yet</h3>
+                        <p className="max-w-70 text-sm">
+                            {isSelf
+                                ? "You haven't posted anything yet. When you do, your posts will show up here."
+                                : `@${profile?.handle} hasn't posted anything yet.`
+                            }
+                        </p>
+                    </div>
+                ) : isError ? (
+                    <div className="flex justify-center p-8 text-destructive">Failed to load posts.</div>
+                ) : (
+                    posts.map((post, i) => (
+                        <PostItem
+                            key={post.id || i}
+                            post={post}
+                            onLike={() => handleLikeClick(i)}
+                            onUserClick={() => {
+                                const postHandle = post.user.handle?.toLowerCase();
+                                if (postHandle) {
+                                    router.push(`/${postHandle}`);
+                                }
+                            }}
+                        />
+                    ))
+                )}
+
+                <div ref={loadMoreRef} />
+                {hasNextPage && isFetchingNextPage && (
+                    Array.from({ length: 3 }).map((_, i) => (
+                        <PostItemSkeleton key={i} />
+                    ))
+                )}
+
+                {/* Tampilkan AuthGate jika pengunjung belum login (isGuest) */}
+                {isGuest && (
+                    <AuthGate
+                        title={`Log in to see more from ${profile?.name || "this user"}`}
+                        description="Sign in or create an account to view full posts, like, and interact with creators."
+                        loginUrl={`/login?redirect=/${handle}`}
+                        registerUrl={`/register?redirect=/${handle}`}
+                    />
+                )}
+            </div>
+
+            {/* Pop-up Dialog Otentikasi Dinamis (Like, Follow, dll) untuk Guest */}
+            <AuthModal
+                isOpen={authModal.isOpen}
+                onClose={() => setAuthModal((prev) => ({ ...prev, isOpen: false }))}
+                action={authModal.action}
+                targetName={authModal.targetName}
+                redirectUrl={`/${handle}`}
+            />
+
+            {/* Pop-up Dialog Edit Profil */}
+            {/* <EditProfileModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onSuccess={(data) => {
+                    mutate();
+                    // Update NextAuth session agar SidebarNav & UserProfileMenu ikut re-render
+                    updateSession({
+                        name: data.name,
+                        bio: data.bio,
+                    });
+                }}
+                initialData={profile}
+            /> */}
+        </>
+    );
+}
