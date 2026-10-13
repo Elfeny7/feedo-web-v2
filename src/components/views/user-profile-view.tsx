@@ -18,7 +18,7 @@ import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 
 export function UserProfileView({ handle }: { handle: string }) {
     const router = useRouter();
-    const { data: user } = useCurrentUser();
+    const { data: user, isLoading: isLoadingUser } = useCurrentUser();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const [authModal, setAuthModal] = useState<{
@@ -46,6 +46,8 @@ export function UserProfileView({ handle }: { handle: string }) {
         hasNextPage,
         isFetchingNextPage,
     } = useUserPosts(handle);
+
+    const isLoading = isLoadingUser || isLoadingProfile || isLoadingPosts;
 
     const loadMoreRef = useInfiniteScroll({
         hasNextPage,
@@ -90,7 +92,7 @@ export function UserProfileView({ handle }: { handle: string }) {
                 >
                     <ChevronLeftIcon className="w-5 h-5" />
                 </button>
-                {isLoadingProfile ? (
+                {isLoading ? (
                     <div className="h-5 w-28 bg-muted animate-pulse rounded-md"></div>
                 ) : (
                     <h1 className="text-xl font-bold tracking-tight">{profile?.name}</h1>
@@ -102,13 +104,8 @@ export function UserProfileView({ handle }: { handle: string }) {
 
             {/* Profile Info */}
             <div className="px-4 sm:px-6 pb-8 border-b border-border relative flex flex-col items-start text-left">
-                {isLoadingProfile ? (
+                {isLoading ? (
                     <div className="w-full flex flex-col items-center">
-                        {/* Edit / Action Button Skeleton */}
-                        {isSelf ? (
-                            <div className="absolute top-3 right-4 sm:top-4 sm:right-6 h-8 w-16 sm:w-20 bg-muted animate-pulse rounded-full z-10"></div>
-                        ) : null}
-
                         {/* Avatar Skeleton */}
                         <div className="self-center w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-background mt-[-12%] sm:mt-[-16%] relative z-0 mb-3 bg-muted animate-pulse shadow-sm"></div>
 
@@ -230,7 +227,7 @@ export function UserProfileView({ handle }: { handle: string }) {
 
             {/* Feed Posts */}
             <div className="flex flex-col">
-                {isLoadingPosts ? (
+                {isLoading ? (
                     Array.from({ length: 5 }).map((_, i) => (
                         <PostItemSkeleton key={i} />
                     ))

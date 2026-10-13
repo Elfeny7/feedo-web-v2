@@ -168,7 +168,12 @@ export function HomeFeedView() {
               key={post.id}
               post={post}
               onLike={() => toggleLike(post.id)}
-              onUserClick={() => { }}
+              onUserClick={() => {
+                const postHandle = post.user.handle?.toLowerCase();
+                if (postHandle) {
+                  router.push(`/${postHandle}`);
+                }
+              }}
             >
             </PostItem>
           ))
