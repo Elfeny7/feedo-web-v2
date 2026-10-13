@@ -20,7 +20,8 @@ export async function GET(
             return NextResponse.json<ResponseData>(
                 err.responseData ??
                 { success: false, message: err.message },
-                { status: err.status });
+                { status: err.status }
+            );
         }
 
         return NextResponse.json<ResponseData>(

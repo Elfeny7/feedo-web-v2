@@ -4,45 +4,29 @@ import { useEffect, useCallback, useState } from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { XIcon } from "@/components/icons";
 import { toast } from "react-hot-toast";
-import { api, ApiError } from "@/lib/fetcher";
+import { ApiError } from "@/types/api";
+import { UserData } from "@/types/auth";
+import { useUpdateProfile } from "@/hooks/use-update-profile";
 
 export interface EditProfileModalProps {
-  /** Menentukan apakah modal sedang terbuka */
   isOpen: boolean;
-  /** Callback saat modal ditutup */
   onClose: () => void;
-  /** Callback setelah profil berhasil disimpan (untuk revalidasi data & update session) */
-  onSuccess?: (data: { name: string; bio: string }) => void;
-  /** Data awal profil yang akan diedit */
-  initialData?: {
-    name?: string;
-    bio?: string;
-    handle?: string;
-    avatar?: string;
-  };
+  initialData: UserData;
 }
 
-/**
- * Komponen `EditProfileModal`
- * 
- * Dialog pop-up responsif untuk mengedit informasi profil publik (Nama, Bio, Cover, & Avatar).
- * Menggunakan prinsip Controlled Components dengan penghitung karakter dan animasi interaktif.
- */
 function EditProfileModalContent({
   onClose,
-  onSuccess,
   initialData,
 }: {
   onClose: () => void;
-  onSuccess?: (data: { name: string; bio: string }) => void;
-  initialData?: EditProfileModalProps["initialData"];
+  initialData: EditProfileModalProps["initialData"];
 }) {
-  // State form lokal diinisialisasi langsung dari initialData saat modal dimount
   const [name, setName] = useState(initialData?.name || "");
   const [bio, setBio] = useState(initialData?.bio || "");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Menangani penutupan modal saat menekan tombol ESC
+  const { mutate: updateProfile } = useUpdateProfile(initialData.handle);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -68,9 +52,8 @@ function EditProfileModalContent({
 
     setIsSaving(true);
     try {
-      await api.put("/users/update-profile", null, { name, bio });
+      updateProfile({ name, bio });
       toast.success("Profile updated successfully!");
-      onSuccess?.({ name, bio });
       onClose();
     } catch (e: unknown) {
       if (e instanceof ApiError) {
@@ -119,7 +102,7 @@ function EditProfileModalContent({
             type="button"
             onClick={handleSave}
             disabled={!name.trim() || isSaving}
-            className="px-5 py-1.5 rounded-full bg-foreground text-background font-bold text-sm hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-sm min-w-[72px] flex items-center justify-center"
+            className="px-5 py-1.5 rounded-full bg-foreground text-background font-bold text-sm hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-sm min-w-18 flex items-center justify-center"
           >
             {isSaving ? (
               <span className="flex items-center gap-1.5">
@@ -138,7 +121,7 @@ function EditProfileModalContent({
         {/* Modal Scrollable Body */}
         <form onSubmit={handleSave} className="flex-1 overflow-y-auto">
           {/* Header / Cover Image Area */}
-          <div className="h-32 sm:h-44 bg-gradient-to-r from-teal-500 to-emerald-400 w-full relative flex items-center justify-center group">
+          <div className="h-32 sm:h-44 bg-linear-to-r from-teal-500 to-emerald-400 w-full relative flex items-center justify-center group">
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
             <button
               type="button"
@@ -228,16 +211,14 @@ function EditProfileModalContent({
 export function EditProfileModal({
   isOpen,
   onClose,
-  onSuccess,
   initialData,
 }: EditProfileModalProps) {
   if (!isOpen) return null;
 
   return (
     <EditProfileModalContent
-      key={initialData?.handle || "edit-profile"}
+      key={initialData?.handle}
       onClose={onClose}
-      onSuccess={onSuccess}
       initialData={initialData}
     />
   );

@@ -7,7 +7,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { ChevronLeftIcon, DocumentIcon } from "@/components/icons";
 import { AuthGate } from "@/components/auth/auth-gate";
 import { AuthModal, AuthModalAction } from "@/components/auth/auth-modal";
-// import { EditProfileModal } from "@/components/modals/edit-profile-modal";
+import { EditProfileModal } from "@/components/modal/edit-profile-modal";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useUserPosts } from "@/hooks/use-user-posts";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -290,19 +290,11 @@ export function UserProfileView({ handle }: { handle: string }) {
             />
 
             {/* Pop-up Dialog Edit Profil */}
-            {/* <EditProfileModal
+            <EditProfileModal
                 isOpen={isEditModalOpen}
                 onClose={() => setIsEditModalOpen(false)}
-                onSuccess={(data) => {
-                    mutate();
-                    // Update NextAuth session agar SidebarNav & UserProfileMenu ikut re-render
-                    updateSession({
-                        name: data.name,
-                        bio: data.bio,
-                    });
-                }}
-                initialData={profile}
-            /> */}
+                initialData={profile!}
+            />
         </>
     );
 }
