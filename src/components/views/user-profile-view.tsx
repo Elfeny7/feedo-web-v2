@@ -14,6 +14,8 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useToggleFollow } from "@/hooks/use-toggle-follow";
 import { useToggleLike } from "@/hooks/use-toggle-like";
 import { PostItemSkeleton } from "@/components/widgets/post-item-skeleton";
+import { ProfileInfoSkeleton } from "@/components/widgets/profile-info-skeleton";
+import { ProfileStats } from "@/components/widgets/profile-stats";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 
 export function UserProfileView({ handle }: { handle: string }) {
@@ -105,47 +107,7 @@ export function UserProfileView({ handle }: { handle: string }) {
             {/* Profile Info */}
             <div className="px-4 sm:px-6 pb-8 border-b border-border relative flex flex-col items-start text-left">
                 {isLoading ? (
-                    <div className="w-full flex flex-col items-center">
-                        {/* Avatar Skeleton */}
-                        <div className="self-center w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-background mt-[-12%] sm:mt-[-16%] relative z-0 mb-3 bg-muted animate-pulse shadow-sm"></div>
-
-                        {/* Name and Handle Skeleton */}
-                        <div className="flex flex-col self-center items-center text-center w-full gap-2">
-                            <div className="h-6 w-32 bg-muted animate-pulse rounded-md"></div>
-                            <div className="h-4 w-24 bg-muted animate-pulse rounded-md"></div>
-                        </div>
-
-                        {/* Bio Skeleton */}
-                        <div className="mt-4 flex flex-col items-center w-full gap-2">
-                            <div className="h-4 w-64 max-w-[80%] bg-muted animate-pulse rounded-md"></div>
-                            <div className="h-4 w-48 max-w-[60%] bg-muted animate-pulse rounded-md"></div>
-                        </div>
-
-                        {/* Stats Skeleton */}
-                        <div className="flex justify-evenly items-center w-full mt-6 mb-2">
-                            <div className="flex flex-col items-center w-20 gap-2">
-                                <div className="h-5 w-8 bg-muted animate-pulse rounded-md"></div>
-                                <div className="h-3 w-16 bg-muted animate-pulse rounded-md"></div>
-                            </div>
-                            <div className="w-px bg-border/80 h-8"></div>
-                            <div className="flex flex-col items-center w-20 gap-2">
-                                <div className="h-5 w-8 bg-muted animate-pulse rounded-md"></div>
-                                <div className="h-3 w-16 bg-muted animate-pulse rounded-md"></div>
-                            </div>
-                            <div className="w-px bg-border/80 h-8"></div>
-                            <div className="flex flex-col items-center w-20 gap-2">
-                                <div className="h-5 w-8 bg-muted animate-pulse rounded-md"></div>
-                                <div className="h-3 w-16 bg-muted animate-pulse rounded-md"></div>
-                            </div>
-                        </div>
-
-                        {/* Follow Button Skeleton */}
-                        {!isSelf && (
-                            <div className="w-full flex justify-center mt-2">
-                                <div className="h-10 w-32 bg-muted animate-pulse rounded-full"></div>
-                            </div>
-                        )}
-                    </div>
+                    <ProfileInfoSkeleton />
                 ) : (
                     <>
                         {/* Tombol Edit Profil (Hanya tampil jika membuka profil milik sendiri) */}
@@ -186,29 +148,14 @@ export function UserProfileView({ handle }: { handle: string }) {
                         ) : null}
 
                         {/* Stats */}
-                        <div className="flex justify-evenly items-center w-full mt-6 mb-2">
-                            <div className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity w-20">
-                                <span className="font-extrabold text-lg text-foreground">{profile?.followings_count ?? 0}</span>
-                                <span className="text-[13px] text-muted-foreground mt-0.5 font-medium">Following</span>
-                            </div>
-
-                            <div className="w-px bg-border/80 h-8"></div>
-
-                            <div className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity w-20">
-                                <span className="font-extrabold text-lg text-foreground">{profile?.followers_count ?? "0"}</span>
-                                <span className="text-[13px] text-muted-foreground mt-0.5 font-medium">Followers</span>
-                            </div>
-
-                            <div className="w-px bg-border/80 h-8"></div>
-
-                            <div className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity w-20">
-                                <span className="font-extrabold text-lg text-foreground">{profile?.posts_count ?? 0}</span>
-                                <span className="text-[13px] text-muted-foreground mt-0.5 font-medium">Posts</span>
-                            </div>
-                        </div>
+                        <ProfileStats
+                            followingsCount={profile?.followings_count}
+                            followersCount={profile?.followers_count}
+                            postsCount={profile?.posts_count}
+                        />
 
                         {/* Tombol Follow / Following (Hanya tampil jika membuka profil pengguna lain) */}
-                        {!isSelf && profile && (
+                        {!isSelf && profile && !isLoading && (
                             <div className="w-full flex justify-center mt-2">
                                 <button
                                     onClick={handleFollowClick}
@@ -225,7 +172,7 @@ export function UserProfileView({ handle }: { handle: string }) {
                 )}
             </div>
 
-            {/* Feed Posts */}
+            {/* Posts */}
             <div className="flex flex-col">
                 {isLoading ? (
                     Array.from({ length: 5 }).map((_, i) => (

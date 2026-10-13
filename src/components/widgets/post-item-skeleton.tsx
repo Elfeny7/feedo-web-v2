@@ -4,7 +4,7 @@ export function PostItemSkeleton() {
     return (
         <div className="p-4 sm:px-6 border-b border-border flex gap-4">
             {/* Avatar */}
-            <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+            <Skeleton className="w-12 h-12 rounded-full shrink-0" />
 
             <div className="flex-1 space-y-2 py-1">
                 {/* Username + handle */}
