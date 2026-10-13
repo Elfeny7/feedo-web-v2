@@ -60,7 +60,6 @@ export function useToggleLike() {
             return { previousFeed };
         },
         onError: (_error, _postId, context) => {
-            console.log("error:", _error);
             if (context?.previousFeed) {
                 queryClient.setQueryData(
                     ["feed"],

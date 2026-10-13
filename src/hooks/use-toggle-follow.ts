@@ -29,7 +29,18 @@ export function useToggleFollow() {
 
             return { previousProfile };
         },
-        onError: () => { },
-        onSettled: () => { },
+        onError: (_error, handle, context) => {
+            if (context?.previousProfile) {
+                queryClient.setQueryData(
+                    ["user-profile", handle],
+                    context.previousProfile
+                )
+            }
+        },
+        onSettled: (_data, _error, handle) => {
+            queryClient.invalidateQueries({
+                queryKey: ["user-profile", handle],
+            });
+        },
     });
 }
