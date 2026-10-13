@@ -6,12 +6,14 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { PostItem } from "@/components/widgets/post-item";
 import { PostItemSkeleton } from "@/components/widgets/post-item-skeleton";
 import { Avatar } from "@/components/ui/avatar";
-import { DocumentIcon } from "@/components/icons";
+import { DocumentIcon, ProgressRingIcon } from "@/components/icons";
 import { useFeed } from "@/hooks/use-feed";
 import { useCreatePost } from "@/hooks/use-create-post";
 import { useToggleLike } from "@/hooks/use-toggle-like";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { toast } from "react-hot-toast";
+
+const MAX_POST_LENGTH = 100;
 
 export function HomeFeedView() {
   const router = useRouter();
@@ -76,7 +78,7 @@ export function HomeFeedView() {
   return (
     <>
       {/* Header */}
-      <header className="sticky top-0 z-10 backdrop-blur-md bg-background/80 border-b border-border px-4 sm:px-6 h-[60px] flex items-center">
+      <header className="sticky top-0 z-10 backdrop-blur-md bg-background/80 border-b border-border px-4 sm:px-6 h-15 flex items-center">
         <h1 className="text-xl font-bold tracking-tight">Home</h1>
       </header>
 
@@ -90,9 +92,9 @@ export function HomeFeedView() {
             onChange={handleInput}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
-            maxLength={100}
+            maxLength={MAX_POST_LENGTH}
             placeholder="What is happening?!"
-            className="w-full bg-transparent resize-none outline-none text-xl placeholder:text-muted-foreground pt-2 min-h-[40px] overflow-hidden"
+            className="w-full bg-transparent resize-none outline-none text-xl placeholder:text-muted-foreground pt-2 min-h-10 overflow-hidden"
             style={{ height: "40px" }}
           />
           {(isFocused || postContent.length > 0) && (
@@ -101,31 +103,23 @@ export function HomeFeedView() {
                 {/* Character Counter Circle */}
                 {postContent.length > 0 && (
                   <div className="relative flex items-center justify-center w-8 h-8">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 32 32">
-                      <circle cx="16" cy="16" r="14" fill="none" className="stroke-border" strokeWidth="3" />
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r="14"
-                        fill="none"
-                        className={`${postContent.length >= 100
-                          ? "stroke-destructive"
+                    <ProgressRingIcon
+                      className="w-full h-full"
+                      progress={postContent.length / MAX_POST_LENGTH}
+                      variant={
+                        postContent.length >= MAX_POST_LENGTH
+                          ? "danger"
                           : postContent.length >= 80
-                            ? "stroke-yellow-500"
-                            : "stroke-primary"
-                          } transition-all duration-300`}
-                        strokeWidth="3"
-                        strokeDasharray="88"
-                        strokeDashoffset={88 - (postContent.length / 100) * 88}
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                    {100 - postContent.length <= 20 && (
+                            ? "warning"
+                            : "default"
+                      }
+                    />
+                    {MAX_POST_LENGTH - postContent.length <= 20 && (
                       <span
-                        className={`absolute text-[10px] font-bold ${postContent.length >= 100 ? "text-destructive" : "text-yellow-500"
+                        className={`absolute text-[10px] font-bold ${postContent.length >= MAX_POST_LENGTH ? "text-destructive" : "text-yellow-500"
                           }`}
                       >
-                        {100 - postContent.length}
+                        {MAX_POST_LENGTH - postContent.length}
                       </span>
                     )}
                   </div>
@@ -133,7 +127,7 @@ export function HomeFeedView() {
 
                 <button
                   onClick={handlePost}
-                  disabled={postContent.trim().length === 0 || postContent.length > 100 || isCreatePostPending}
+                  disabled={postContent.trim().length === 0 || postContent.length > MAX_POST_LENGTH || isCreatePostPending}
                   className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary text-primary-foreground font-bold py-2.5 px-6 rounded-full shadow-md shadow-primary/20 transition-all active:scale-95 text-sm cursor-pointer"
                 >
                   {isCreatePostPending ? "Posting..." : "Post"}
