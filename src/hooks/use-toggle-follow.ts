@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { client } from "@/lib/fetcher";
-import type { ResponseData } from "@/types/api";
 import type { UserData } from "@/types/auth";
 
 export function useToggleFollow() {
@@ -12,18 +11,17 @@ export function useToggleFollow() {
                 queryKey: ["user-profile", handle],
             });
 
-            const previousProfile = queryClient.getQueryData<ResponseData<UserData>>(["user-profile", handle]);
+            const previousProfile = queryClient.getQueryData<UserData>(["user-profile", handle]);
 
-            queryClient.setQueryData<ResponseData<UserData>>(["user-profile", handle], (oldData) => {
+            queryClient.setQueryData<UserData>(["user-profile", handle], (oldData) => {
                 if (!oldData) return oldData;
-                if (!oldData.data) return oldData;
 
                 return {
                     ...oldData,
-                    data: {
-                        ...oldData.data,
-                        is_followed: !oldData.data.is_followed,
-                    },
+                    is_followed: !oldData.is_followed,
+                    followers_count: oldData.is_followed
+                    ? oldData.followers_count! - 1
+                    : oldData.followers_count! + 1
                 }
             });
 
