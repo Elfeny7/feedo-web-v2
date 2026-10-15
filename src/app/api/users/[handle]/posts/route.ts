@@ -2,6 +2,8 @@ import { backend } from "@/lib/fetcher";
 import { NextResponse } from "next/server";
 import { ApiError, ResponseData } from "@/types/api";
 import type { PostCollection } from "@/types/post";
+import { requestWithRefresh } from "@/lib/server/authenticated-request";
+import { getAccessToken } from "@/lib/server/get-access-token";
 
 export async function GET(
     request: Request,
@@ -10,9 +12,12 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const page = searchParams.get("page") ?? "1";
     const { handle } = await params;
+    const token = await getAccessToken();
 
     try {
-        const responseData = await backend.get<PostCollection>(`/users/${handle}/posts?page=${page}&per_page=5`);
+        const responseData = token
+            ? await requestWithRefresh((token: string) => backend.get<PostCollection>(`/users/${handle}/posts?page=${page}&per_page=5`, token))
+            : await backend.get<PostCollection>(`/users/${handle}/posts?page=${page}&per_page=5`);
         const nextResponse = NextResponse.json(responseData);
 
         return nextResponse;

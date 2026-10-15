@@ -71,7 +71,7 @@ export function UserProfileView({ handle }: { handle: string }) {
         toggleFollow(handle);
     };
 
-    const handleLikeClick = (index: number) => {
+    const handleLikeClick = (postId: number) => {
         if (isGuest) {
             setAuthModal({
                 isOpen: true,
@@ -80,7 +80,7 @@ export function UserProfileView({ handle }: { handle: string }) {
             });
             return;
         }
-        toggleLike(index);
+        toggleLike(postId);
     };
 
     return (
@@ -194,11 +194,11 @@ export function UserProfileView({ handle }: { handle: string }) {
                 ) : isError ? (
                     <div className="flex justify-center p-8 text-destructive">Failed to load posts.</div>
                 ) : (
-                    posts.map((post, i) => (
+                    posts.map((post) => (
                         <PostItem
-                            key={post.id || i}
+                            key={post.id}
                             post={post}
-                            onLike={() => handleLikeClick(i)}
+                            onLike={() => handleLikeClick(post.id)}
                             onUserClick={() => {
                                 const postHandle = post.user.handle?.toLowerCase();
                                 if (postHandle) {
