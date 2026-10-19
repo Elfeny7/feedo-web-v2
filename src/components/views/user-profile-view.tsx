@@ -6,8 +6,9 @@ import { PostItem } from "@/components/widgets/post-item";
 import { Avatar } from "@/components/ui/avatar";
 import { ChevronLeftIcon, DocumentIcon } from "@/components/icons";
 import { AuthGate } from "@/components/auth/auth-gate";
-import { AuthModal, AuthModalAction } from "@/components/auth/auth-modal";
+import { GuestActionModal, GuestAction } from "@/components/modal/guest-action-modal";
 import { EditProfileModal } from "@/components/modal/edit-profile-modal";
+import { UnfollowModal } from "@/components/modal/unfollow-modal";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useUserPosts } from "@/hooks/use-user-posts";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -22,10 +23,11 @@ export function UserProfileView({ handle }: { handle: string }) {
     const router = useRouter();
     const { data: user, isLoading: isLoadingUser } = useCurrentUser();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isUnfollowModalOpen, setIsUnfollowModalOpen] = useState(false);
 
     const [authModal, setAuthModal] = useState<{
         isOpen: boolean;
-        action: AuthModalAction;
+        action: GuestAction;
         targetName?: string;
     }>({
         isOpen: false,
@@ -37,7 +39,7 @@ export function UserProfileView({ handle }: { handle: string }) {
     const isGuest = !user;
 
     const { data: profile, isLoading: isLoadingProfile } = useUserProfile(handle);
-    const { mutate: toggleFollow } = useToggleFollow();
+    const { mutate: toggleFollow, isPending: isToggleFollowPending } = useToggleFollow();
     const { mutate: toggleLike } = useToggleLike();
 
     const {
@@ -68,7 +70,19 @@ export function UserProfileView({ handle }: { handle: string }) {
             });
             return;
         }
+
+        if (profile?.is_followed) {
+            setIsUnfollowModalOpen(true);
+            return;
+        }
+
         toggleFollow(handle);
+    };
+
+    const handleUnfollowConfirm = () => {
+        toggleFollow(handle, {
+            onSuccess: () => setIsUnfollowModalOpen(false),
+        });
     };
 
     const handleLikeClick = (postId: number) => {
@@ -228,12 +242,20 @@ export function UserProfileView({ handle }: { handle: string }) {
             </div>
 
             {/* Pop-up Dialog Otentikasi Dinamis (Like, Follow, dll) untuk Guest */}
-            <AuthModal
+            <GuestActionModal
                 isOpen={authModal.isOpen}
                 onClose={() => setAuthModal((prev) => ({ ...prev, isOpen: false }))}
                 action={authModal.action}
                 targetName={authModal.targetName}
                 redirectUrl={`/${handle}`}
+            />
+
+            <UnfollowModal
+                isOpen={isUnfollowModalOpen}
+                onClose={() => setIsUnfollowModalOpen(false)}
+                onConfirm={handleUnfollowConfirm}
+                userName={profile?.name || handle}
+                isPending={isToggleFollowPending}
             />
 
             {/* Pop-up Dialog Edit Profil */}
