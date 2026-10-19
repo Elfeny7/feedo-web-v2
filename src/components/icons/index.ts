@@ -17,3 +17,4 @@ export * from "./heart-icon";
 export * from "./document-icon";
 export * from "./progress-ring-icon";
 export * from "./x-icon";
+export * from "./camera-icon";
