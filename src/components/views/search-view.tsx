@@ -3,17 +3,19 @@
 import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useSearch } from "@/hooks/use-search";
+import { useToggleFollow } from "@/hooks/use-toggle-follow";
 import { useSuggestion } from "@/hooks/use-suggestion";
 import { SearchIcon } from "@/components/icons";
 import { UserItem } from "@/components/widgets/user-item";
 
-
 export function SearchView() {
     const [query, setQuery] = useState("");
+
     const debouncedQuery = useDebounce(query, 300);
 
     const searchQuery = useSearch(debouncedQuery);
-    const suggestionsQuery = useSuggestion("5")
+    const suggestionsQuery = useSuggestion("5");
+    const { mutate: toggleFollow } = useToggleFollow();
 
     const isSearching = debouncedQuery.length > 0;
 
@@ -75,7 +77,7 @@ export function SearchView() {
                     ) : (
                         <div className="p-8 text-center text-muted-foreground">Searching...</div>
                     )
-                ) :  users.length === 0 && debouncedQuery.length < 3 ? (
+                ) : users.length === 0 && debouncedQuery.length < 3 ? (
                     <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
                         <div className="w-20 h-20 mb-4 rounded-full bg-muted flex items-center justify-center opacity-70">
                             <SearchIcon className="w-10 h-10" />
@@ -99,7 +101,7 @@ export function SearchView() {
                     </div>
                 ) : (
                     users.map((user, i) => (
-                        <UserItem key={user.id || i} suggestedUser={user} onFollowClick={() => { }} />
+                        <UserItem key={user.id || i} suggestedUser={user} onFollowClick={toggleFollow} />
                     ))
                 )}
             </div>
