@@ -25,6 +25,9 @@ export function useToggleFollow() {
                     queryKey: ["user-profile", handle],
                 }),
                 queryClient.cancelQueries({
+                    queryKey: ["me"],
+                }),
+                queryClient.cancelQueries({
                     queryKey: ["suggestions"],
                 }),
                 queryClient.cancelQueries({
@@ -32,11 +35,29 @@ export function useToggleFollow() {
                 }),
             ]);
 
+            const me = queryClient.getQueryData<UserData>(["me"]);
+            const myHandle = me?.handle;
+
             const previousProfile = queryClient.getQueryData<UserData>(["user-profile", handle]);
+            const previousMe = myHandle ? queryClient.getQueryData<UserData>(["user-profile", myHandle]) : undefined;
             const previousSuggestions = queryClient.getQueryData<UserData[]>(["suggestions"]);
             const previousSearch = queryClient.getQueriesData<UserData[]>({
                 queryKey: ["search"],
             });
+
+            const userFromSearch = previousSearch
+                .flatMap(([, data]) => {
+                    return Array.isArray(data) ? data : [];
+                })
+                .find((user) => user.handle === handle);
+
+            const userFromSuggestions = previousSuggestions?.find(
+                (user) => user.handle === handle,
+            );
+
+            const targetUser = previousProfile ?? userFromSearch ?? userFromSuggestions;
+
+            const isCurrentlyFollowed = targetUser?.is_followed;
 
             queryClient.setQueryData<UserData>(
                 ["user-profile", handle],
@@ -46,6 +67,24 @@ export function useToggleFollow() {
                     return toggleFollowUser(oldData);
                 }
             );
+
+            if (
+                previousMe?.followings_count !== undefined &&
+                isCurrentlyFollowed !== undefined &&
+                myHandle
+            ) {
+                queryClient.setQueryData<UserData>(
+                    ["user-profile", myHandle],
+                    {
+                        ...previousMe,
+                        followings_count: Math.max(
+                            0,
+                            previousMe.followings_count +
+                            (isCurrentlyFollowed ? -1 : 1),
+                        ),
+                    },
+                );
+            }
 
             queryClient.setQueryData<UserData[]>(
                 ["suggestions"],
@@ -67,13 +106,20 @@ export function useToggleFollow() {
                     )
             );
 
-            return { previousProfile, previousSuggestions, previousSearch };
+            return { myHandle, previousProfile, previousMe, previousSuggestions, previousSearch };
         },
         onError: (_error, handle, context) => {
             if (context?.previousProfile !== undefined) {
                 queryClient.setQueryData(
                     ["user-profile", handle],
                     context.previousProfile
+                );
+            }
+
+            if (context?.previousMe !== undefined && context.myHandle) {
+                queryClient.setQueryData(
+                    ["user-profile", context.myHandle],
+                    context.previousMe
                 );
             }
 
@@ -87,10 +133,15 @@ export function useToggleFollow() {
                 queryClient.setQueryData(queryKey, data);
             });
         },
-        onSettled: (_data, _error, handle) => {
+        onSettled: (_data, _error, handle, context) => {
             queryClient.invalidateQueries({
                 queryKey: ["user-profile", handle],
             });
+            if (context?.myHandle) {
+                queryClient.invalidateQueries({
+                    queryKey: ["user-profile", context.myHandle],
+                });
+            }
             // queryClient.invalidateQueries({
             //     queryKey: ["suggestions"],
             // });
