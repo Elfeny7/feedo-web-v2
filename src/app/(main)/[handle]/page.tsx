@@ -9,10 +9,11 @@ export async function generateMetadata({ params }: UserProfilePageProps): Promis
     const { handle } = await params;
     const cleanHandle = decodeURIComponent(handle).replace(/^@/, "");
 
+    //opengraph metadata
     try { } catch { }
 
     return {
-        title: "Profile | Feedo",
+        title: `@${cleanHandle} | Feedo`,
         description: "View user profile on Feedo.",
     }
 }
