@@ -19,5 +19,5 @@ export async function generateMetadata({ params }: UserFollowersPageProps): Prom
 
 export default async function UserProfileFollowersPage({ params }: UserFollowersPageProps) {
     const { handle } = await params;
-    return <UserFollowView handle={handle} type="followings" />;
+    return <UserFollowView handle={handle} type="followers" />;
 }

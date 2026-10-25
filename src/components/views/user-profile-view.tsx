@@ -166,6 +166,8 @@ export function UserProfileView({ handle }: { handle: string }) {
                             followingsCount={profile?.followings_count}
                             followersCount={profile?.followers_count}
                             postsCount={profile?.posts_count}
+                            onFollowingClick={() => router.push(`/${handle}/following`)}
+                            onFollowersClick={() => router.push(`/${handle}/followers`)}
                         />
 
                         {/* Tombol Follow / Following (Hanya tampil jika membuka profil pengguna lain) */}
