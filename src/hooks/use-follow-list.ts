@@ -6,17 +6,9 @@ export function useFollowList(handle: string, type: "following" | "followers") {
     return useInfiniteQuery({
         queryKey: ["users", handle, type],
         initialPageParam: 1,
-        queryFn: ({ pageParam }) => {
-            if (type === "following") {
-                return client.get<UserCollection>(
-                    `/api/users/${handle}/following?page=${pageParam}`
-                );
-            } else {
-                return client.get<UserCollection>(
-                    `/api/users/${handle}/followers?page=${pageParam}`
-                );
-            }
-        },
+        queryFn: ({ pageParam }) => client.get<UserCollection>(
+            `/api/users/${handle}/${type}?page=${pageParam}`
+        ),
         getNextPageParam: (lastPage) => {
             const meta = lastPage?.data?.meta;
 
@@ -26,5 +18,6 @@ export function useFollowList(handle: string, type: "following" | "followers") {
 
             return meta.current_page + 1;
         },
+        staleTime: 30 * 1000,
     });
 }
