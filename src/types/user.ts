@@ -1,4 +1,6 @@
 import type { UserData } from "@/types/auth";
+import type { PaginatedResponse } from  "@/types/api";
+
 
 export type UpdateProfilePayload = {
     name: string,
@@ -10,3 +12,5 @@ export type ToggleFollow = {
 }
 
 export type UserSuggestions = UserData[];
+
+export type UserCollection = PaginatedResponse<UserData>;

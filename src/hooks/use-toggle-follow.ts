@@ -1,6 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { client } from "@/lib/fetcher";
 import type { UserData } from "@/types/auth";
+import type { UserCollection } from "@/types/user";
+import type { InfiniteData } from "@tanstack/react-query";
+import type { ResponseData } from "@/types/api";
 
 function toggleFollowUser(user: UserData): UserData {
     const isFollowed = user.is_followed;
@@ -12,6 +15,34 @@ function toggleFollowUser(user: UserData): UserData {
         followers_count: isFollowed
             ? Math.max(0, followersCount - 1)
             : followersCount + 1,
+    };
+}
+
+function updateFollowList(
+    oldData:
+        | InfiniteData<ResponseData<UserCollection>>
+        | undefined,
+    targetHandle: string,
+): InfiniteData<ResponseData<UserCollection>> | undefined {
+    if (!oldData) return oldData;
+
+    return {
+        ...oldData,
+        pages: oldData.pages.map((response) => {
+            if (!response?.data) return response;
+
+            return {
+                ...response,
+                data: {
+                    ...response.data,
+                    data: response.data.data.map((user) =>
+                        user.handle === targetHandle
+                            ? toggleFollowUser(user)
+                            : user,
+                    ),
+                },
+            };
+        }),
     };
 }
 
@@ -33,6 +64,9 @@ export function useToggleFollow() {
                 queryClient.cancelQueries({
                     queryKey: ["search"],
                 }),
+                queryClient.cancelQueries({
+                    queryKey: ["users"],
+                }),
             ]);
 
             const me = queryClient.getQueryData<UserData>(["me"]);
@@ -44,6 +78,12 @@ export function useToggleFollow() {
             const previousSearch = queryClient.getQueriesData<UserData[]>({
                 queryKey: ["search"],
             });
+            const previousUserLists =
+                queryClient.getQueriesData<
+                    InfiniteData<ResponseData<UserCollection>>
+                >({
+                    queryKey: ["users"],
+                });
 
             const userFromSearch = previousSearch
                 .flatMap(([, data]) => {
@@ -106,7 +146,13 @@ export function useToggleFollow() {
                     )
             );
 
-            return { myHandle, previousProfile, previousMe, previousSuggestions, previousSearch };
+            previousUserLists.forEach(([queryKey]) => {
+                queryClient.setQueryData<
+                    InfiniteData<ResponseData<UserCollection>>
+                >(queryKey, (oldData) => updateFollowList(oldData, handle));
+            });
+
+            return { myHandle, previousProfile, previousMe, previousSuggestions, previousSearch, previousUserLists };
         },
         onError: (_error, handle, context) => {
             if (context?.previousProfile !== undefined) {
@@ -130,6 +176,9 @@ export function useToggleFollow() {
                 );
             }
             context?.previousSearch?.forEach(([queryKey, data]) => {
+                queryClient.setQueryData(queryKey, data);
+            });
+            context?.previousUserLists?.forEach(([queryKey, data]) => {
                 queryClient.setQueryData(queryKey, data);
             });
         },

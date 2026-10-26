@@ -3,8 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { ChevronLeftIcon } from "@/components/icons";
-import { UserData } from "@/types/auth";
 import { UserItem } from "@/components/widgets/user-item";
+import { useToggleFollow } from "@/hooks/use-toggle-follow";
+import { Tabs } from "@/components/ui/tabs";
+import { useFollowList } from "@/hooks/use-follow-list";
 
 type UserFollowViewProps = {
     handle: string;
@@ -14,62 +16,21 @@ type UserFollowViewProps = {
 export function UserFollowView({ handle, type }: UserFollowViewProps) {
     const router = useRouter();
 
-    const { data: profile, isLoading: isLoadingProfile } = useUserProfile(handle);
+    const tabs = [
+        { label: "Following", value: "following" },
+        { label: "Followers", value: "followers" },
+    ] as const;
 
-    const isLoading = isLoadingProfile;
+    const userProfileQuery = useUserProfile(handle);
+    const followListQuery = useFollowList(handle, type);
+    const { mutate: toggleFollow } = useToggleFollow();
+    
+    const users = followListQuery.data?.pages.flatMap((page) => page?.data?.data ?? [],) ?? [];
+    const isLoading = userProfileQuery.isLoading || followListQuery.isLoading;
+    const profile = userProfileQuery.data;
+
     const title = type === "following" ? "following" : "followers";
 
-    const usersFollowing: UserData[] = [
-        {
-            id: 1,
-            name: "jack",
-            email: "orang@email.com",
-            handle: "orangorang",
-            bio: "bio dari orang",
-            followers_count: 0,
-            followings_count: 0,
-            posts_count: 0,
-            is_followed: false,
-        },
-        {
-            id: 2,
-            name: "reaper",
-            email: "people@email.com",
-            handle: "peoplepeople",
-            bio: "bio dari people",
-            followers_count: 0,
-            followings_count: 0,
-            posts_count: 0,
-            is_followed: false,
-        },
-    ];
-
-    const usersFollowers: UserData[] = [
-        {
-            id: 1,
-            name: "orang",
-            email: "orang@email.com",
-            handle: "orangorang",
-            bio: "bio dari orang",
-            followers_count: 0,
-            followings_count: 0,
-            posts_count: 0,
-            is_followed: false,
-        },
-        {
-            id: 2,
-            name: "people",
-            email: "people@email.com",
-            handle: "peoplepeople",
-            bio: "bio dari people",
-            followers_count: 0,
-            followings_count: 0,
-            posts_count: 0,
-            is_followed: false,
-        },
-    ];
-
-    const users = type === "following" ? usersFollowing : usersFollowers;
 
     return (
         <>
@@ -90,45 +51,37 @@ export function UserFollowView({ handle, type }: UserFollowViewProps) {
             </header>
 
             {/* Followers / Following Tabs */}
-            <div className="sticky top-15 z-10 grid grid-cols-2 border-b border-border bg-background/80 backdrop-blur-md">
-                <button
-                    type="button"
-                    onClick={() => router.push(`followers`)}
-                    className={`relative cursor-pointer flex min-h-12 items-center justify-center px-4 text-sm font-semibold transition-colors hover:bg-muted/50 sm:text-base ${type === "followers"
-                        ? "text-foreground"
-                        : "text-muted-foreground"
-                        }`}
-                    aria-current={type === "followers" ? "page" : undefined}
-                >
-                    Followers
-
-                    {type === "followers" && (
-                        <span className="absolute inset-x-6 bottom-0 h-0.5 rounded-full bg-primary sm:inset-x-10" />
-                    )}
-                </button>
-
-                <button
-                    type="button"
-                    onClick={() => router.push(`following`)}
-                    className={`relative cursor-pointer flex min-h-12 items-center justify-center px-4 text-sm font-semibold transition-colors hover:bg-muted/50 sm:text-base ${type === "following"
-                        ? "text-foreground"
-                        : "text-muted-foreground"
-                        }`}
-                    aria-current={type === "following" ? "page" : undefined}
-                >
-                    Following
-
-                    {type === "following" && (
-                        <span className="absolute inset-x-6 bottom-0 h-0.5 rounded-full bg-primary sm:inset-x-10" />
-                    )}
-                </button>
-            </div>
+            <Tabs
+                tabs={[...tabs]}
+                activeTab={type}
+                onTabChange={(value) => router.push(value)}
+            />
 
             {/* User Following/Followers List */}
             <div className="flex flex-col">
-                {users.map((user, i) => (
-                    <UserItem key={user.id || i} suggestedUser={user} onFollowClick={() => { }} />
-                ))}
+                {isLoading && users.length === 0 ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="p-4 sm:px-6 border-b border-border flex items-center justify-between gap-4 animate-pulse">
+                            <div className="flex items-center gap-4 flex-1">
+                                <div className="w-12 h-12 rounded-full bg-muted shrink-0"></div>
+                                <div className="flex flex-col gap-2 flex-1">
+                                    <div className="h-4 w-32 bg-muted rounded-md"></div>
+                                    <div className="h-3.5 w-24 bg-muted rounded-md"></div>
+                                </div>
+                            </div>
+                            <div className="h-8 w-20 bg-muted rounded-full shrink-0"></div>
+                        </div>
+                    ))
+                ) : users.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
+                        <h3 className="text-xl font-bold text-foreground mb-2">No {type} yet</h3>
+                        <p className="max-w-70 text-sm">{type} will show up here.</p>
+                    </div>
+                ) : (
+                    users.map((user, i) => (
+                        <UserItem key={user.id || i} suggestedUser={user} onFollowClick={toggleFollow} />
+                    ))
+                )}
             </div>
         </>
     );
