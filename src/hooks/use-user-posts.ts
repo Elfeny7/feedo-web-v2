@@ -16,5 +16,6 @@ export function useUserPosts(handle: string) {
 
             return meta.current_page + 1;
         },
+        staleTime: 60 * 1000,
     });
 }

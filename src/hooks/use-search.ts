@@ -12,6 +12,6 @@ export function useSearch(query: string) {
             return searchResult;
         },
         enabled: query.length > 2,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 10 * 60 * 1000,
     });
 }

@@ -15,6 +15,6 @@ export function useUserProfile(handle: string) {
 
             return user;
         },
-        staleTime: 30 * 1000,
+        staleTime: 60 * 1000,
     });
 }

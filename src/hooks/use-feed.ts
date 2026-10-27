@@ -16,7 +16,6 @@ export function useFeed() {
 
             return meta.current_page + 1;
         },
-        staleTime: 30 * 1000,
-        gcTime: 5 * 60 * 1000,
+        staleTime: 60 * 1000,
     });
 }

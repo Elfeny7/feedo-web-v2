@@ -53,7 +53,7 @@ export function SearchView() {
             </div>
 
             {/* Search Results */}
-            <div className="flex flex-col border-t border-border mt-2">
+            <div className="flex flex-col mt-2">
                 <h2 className="text-xl font-extrabold tracking-tight p-4 sm:px-6 mb-2">
                     {debouncedQuery ? "Search Results" : "Suggested Users"}
                 </h2>
