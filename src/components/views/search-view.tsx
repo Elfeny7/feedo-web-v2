@@ -6,6 +6,7 @@ import { useSearch } from "@/hooks/use-search";
 import { useSuggestion } from "@/hooks/use-suggestion";
 import { SearchIcon } from "@/components/icons";
 import { UserItem } from "@/components/widgets/user-item";
+import { UserItemSkeleton } from "@/components/widgets/user-item-skeleton";
 
 export function SearchView() {
     const [query, setQuery] = useState("");
@@ -60,18 +61,11 @@ export function SearchView() {
 
                 {isLoading && users.length === 0 ? (
                     !debouncedQuery ? (
-                        Array.from({ length: 5 }).map((_, i) => (
-                            <div key={i} className="p-4 sm:px-6 border-b border-border flex items-center justify-between gap-4 animate-pulse">
-                                <div className="flex items-center gap-4 flex-1">
-                                    <div className="w-12 h-12 rounded-full bg-muted shrink-0"></div>
-                                    <div className="flex flex-col gap-2 flex-1">
-                                        <div className="h-4 w-32 bg-muted rounded-md"></div>
-                                        <div className="h-3.5 w-24 bg-muted rounded-md"></div>
-                                    </div>
-                                </div>
-                                <div className="h-8 w-20 bg-muted rounded-full shrink-0"></div>
-                            </div>
-                        ))
+                        <>
+                            {Array.from({ length: 5 }).map((_, i) => (
+                                <UserItemSkeleton key={i} />
+                            ))}
+                        </>
                     ) : (
                         <div className="p-8 text-center text-muted-foreground">Searching...</div>
                     )
