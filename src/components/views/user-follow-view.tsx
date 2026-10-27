@@ -26,11 +26,9 @@ export function UserFollowView({ handle, type }: UserFollowViewProps) {
     const { mutate: toggleFollow } = useToggleFollow();
     
     const users = followListQuery.data?.pages.flatMap((page) => page?.data?.data ?? [],) ?? [];
-    const isLoading = userProfileQuery.isLoading || followListQuery.isLoading;
     const profile = userProfileQuery.data;
 
     const title = type === "following" ? "following" : "followers";
-
 
     return (
         <>
@@ -43,7 +41,7 @@ export function UserFollowView({ handle, type }: UserFollowViewProps) {
                 >
                     <ChevronLeftIcon className="w-5 h-5" />
                 </button>
-                {isLoading ? (
+                {userProfileQuery.isLoading ? (
                     <div className="h-5 w-28 bg-muted animate-pulse rounded-md"></div>
                 ) : (
                     <h1 className="text-xl font-bold tracking-tight">{profile?.name}&apos;s {title}</h1>
@@ -59,7 +57,7 @@ export function UserFollowView({ handle, type }: UserFollowViewProps) {
 
             {/* User Following/Followers List */}
             <div className="flex flex-col">
-                {isLoading && users.length === 0 ? (
+                {followListQuery.isLoading && users.length === 0 ? (
                     Array.from({ length: 5 }).map((_, i) => (
                         <div key={i} className="p-4 sm:px-6 border-b border-border flex items-center justify-between gap-4 animate-pulse">
                             <div className="flex items-center gap-4 flex-1">
