@@ -12,7 +12,7 @@ import { UnfollowModal } from "@/components/modal/unfollow-modal";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { useUserPosts } from "@/hooks/use-user-posts";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import { useToggleFollow } from "@/hooks/use-toggle-follow";
+import { useFollowAction } from "@/hooks/use-follow-action";
 import { useToggleLike } from "@/hooks/use-toggle-like";
 import { PostItemSkeleton } from "@/components/widgets/post-item-skeleton";
 import { ProfileInfoSkeleton } from "@/components/widgets/profile-info-skeleton";
@@ -23,7 +23,6 @@ export function UserProfileView({ handle }: { handle: string }) {
     const router = useRouter();
     const { data: user, isLoading: isLoadingUser } = useCurrentUser();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [isUnfollowModalOpen, setIsUnfollowModalOpen] = useState(false);
 
     const [authModal, setAuthModal] = useState<{
         isOpen: boolean;
@@ -39,7 +38,12 @@ export function UserProfileView({ handle }: { handle: string }) {
     const isGuest = !user;
 
     const { data: profile, isLoading: isLoadingProfile } = useUserProfile(handle);
-    const { mutate: toggleFollow, isPending: isToggleFollowPending } = useToggleFollow();
+
+    const followAction = useFollowAction({
+        isFollowed: profile?.is_followed ?? false,
+        targetHandle: handle,
+    });
+
     const { mutate: toggleLike } = useToggleLike();
 
     const {
@@ -71,18 +75,7 @@ export function UserProfileView({ handle }: { handle: string }) {
             return;
         }
 
-        if (profile?.is_followed) {
-            setIsUnfollowModalOpen(true);
-            return;
-        }
-
-        toggleFollow(handle);
-    };
-
-    const handleUnfollowConfirm = () => {
-        toggleFollow(handle, {
-            onSuccess: () => setIsUnfollowModalOpen(false),
-        });
+        followAction.handleFollowClick();
     };
 
     const handleLikeClick = (postId: number) => {
@@ -253,11 +246,11 @@ export function UserProfileView({ handle }: { handle: string }) {
             />
 
             <UnfollowModal
-                isOpen={isUnfollowModalOpen}
-                onClose={() => setIsUnfollowModalOpen(false)}
-                onConfirm={handleUnfollowConfirm}
+                isOpen={followAction.isUnfollowModalOpen}
+                onClose={() => followAction.setIsUnfollowModalOpen(false)}
+                onConfirm={followAction.handleUnfollowConfirm}
                 userName={profile?.name || handle}
-                isPending={isToggleFollowPending}
+                isPending={followAction.isPending}
             />
 
             {/* Pop-up Dialog Edit Profil */}

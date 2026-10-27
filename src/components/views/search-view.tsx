@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useSearch } from "@/hooks/use-search";
-import { useToggleFollow } from "@/hooks/use-toggle-follow";
 import { useSuggestion } from "@/hooks/use-suggestion";
 import { SearchIcon } from "@/components/icons";
 import { UserItem } from "@/components/widgets/user-item";
@@ -15,7 +14,6 @@ export function SearchView() {
 
     const searchQuery = useSearch(debouncedQuery);
     const suggestionsQuery = useSuggestion("5");
-    const { mutate: toggleFollow } = useToggleFollow();
 
     const isSearching = debouncedQuery.length > 0;
 
@@ -101,7 +99,7 @@ export function SearchView() {
                     </div>
                 ) : (
                     users.map((user, i) => (
-                        <UserItem key={user.id || i} suggestedUser={user} onFollowClick={toggleFollow} />
+                        <UserItem key={user.id || i} suggestedUser={user} />
                     ))
                 )}
             </div>

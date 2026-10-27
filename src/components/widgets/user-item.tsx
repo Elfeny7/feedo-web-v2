@@ -2,16 +2,22 @@ import type { UserData } from "@/types/auth";
 import { Avatar } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useFollowAction } from "@/hooks/use-follow-action";
+import { UnfollowModal } from "@/components/modal/unfollow-modal";
 
 interface UserItemProps {
   suggestedUser: UserData;
-  onFollowClick: (handle: string) => void;
 }
 
-export function UserItem({ suggestedUser, onFollowClick }: UserItemProps) {
+export function UserItem({ suggestedUser }: UserItemProps) {
   const { data: currentUser } = useCurrentUser();
   const router = useRouter();
   const isSameUser = currentUser?.id === suggestedUser.id;
+
+  const followAction = useFollowAction({
+    isFollowed: suggestedUser.is_followed ?? false,
+    targetHandle: suggestedUser.handle,
+  });
 
   const handleUserClick = () => {
     router.push(`/${suggestedUser.handle}`);
@@ -34,15 +40,24 @@ export function UserItem({ suggestedUser, onFollowClick }: UserItemProps) {
 
       {/* Show Follow button if it's not the current user */}
       {!isSameUser && (
-        <button
-          onClick={() => onFollowClick(suggestedUser.handle)}
-          className={`px-4 py-1.5 rounded-full font-bold transition-all cursor-pointer text-sm ${suggestedUser.is_followed
-            ? "bg-transparent border border-border hover:border-destructive hover:text-destructive hover:bg-destructive/10 text-foreground"
-            : "bg-foreground text-background hover:bg-foreground/90"
-            }`}
-        >
-          {suggestedUser.is_followed ? "Following" : "Follow"}
-        </button>
+        <>
+          <button
+            onClick={followAction.handleFollowClick}
+            className={`px-4 py-1.5 rounded-full font-bold transition-all cursor-pointer text-sm ${suggestedUser.is_followed
+              ? "bg-transparent border border-border hover:border-destructive hover:text-destructive hover:bg-destructive/10 text-foreground"
+              : "bg-foreground text-background hover:bg-foreground/90"
+              }`}
+          >
+            {suggestedUser.is_followed ? "Following" : "Follow"}
+          </button>
+          <UnfollowModal
+            isOpen={followAction.isUnfollowModalOpen}
+            onClose={() => followAction.setIsUnfollowModalOpen(false)}
+            onConfirm={followAction.handleUnfollowConfirm}
+            userName={suggestedUser.name}
+            isPending={followAction.isPending}
+          />
+        </>
       )}
     </article>
   );

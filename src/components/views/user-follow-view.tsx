@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { ChevronLeftIcon } from "@/components/icons";
 import { UserItem } from "@/components/widgets/user-item";
-import { useToggleFollow } from "@/hooks/use-toggle-follow";
 import { Tabs } from "@/components/ui/tabs";
 import { useFollowList } from "@/hooks/use-follow-list";
 
@@ -23,8 +22,7 @@ export function UserFollowView({ handle, type }: UserFollowViewProps) {
 
     const userProfileQuery = useUserProfile(handle);
     const followListQuery = useFollowList(handle, type);
-    const { mutate: toggleFollow } = useToggleFollow();
-    
+
     const users = followListQuery.data?.pages.flatMap((page) => page?.data?.data ?? [],) ?? [];
     const profile = userProfileQuery.data;
 
@@ -77,7 +75,7 @@ export function UserFollowView({ handle, type }: UserFollowViewProps) {
                     </div>
                 ) : (
                     users.map((user, i) => (
-                        <UserItem key={user.id || i} suggestedUser={user} onFollowClick={toggleFollow} />
+                        <UserItem key={user.id || i} suggestedUser={user} />
                     ))
                 )}
             </div>
