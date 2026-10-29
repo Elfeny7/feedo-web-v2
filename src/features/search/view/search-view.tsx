@@ -7,7 +7,7 @@ import { useSuggestion } from "@/features/search/hooks/use-suggestion";
 import { SearchIcon } from "@/components/icons";
 import { UserItem } from "@/features/users/components/user-item";
 import { UserItemSkeleton } from "@/features/users/components/user-item-skeleton";
-import { PageHeader } from "@/components/navigation/page-header";
+import { PageHeader } from "@/components/ui/page-header";
 
 export function SearchView() {
     const [query, setQuery] = useState("");

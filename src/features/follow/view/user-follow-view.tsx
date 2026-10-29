@@ -7,7 +7,7 @@ import { UserItemSkeleton } from "@/features/users/components/user-item-skeleton
 import { Tabs } from "@/components/ui/tabs";
 import { useFollowList } from "@/features/follow/hooks/use-follow-list";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
-import { PageHeader } from "@/components/navigation/page-header";
+import { PageHeader } from "@/components/ui/page-header";
 
 type UserFollowViewProps = {
     handle: string;

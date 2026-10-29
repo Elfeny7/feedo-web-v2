@@ -18,7 +18,7 @@ import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton
 import { ProfileInfoSkeleton } from "@/features/profile/components/profile-info-skeleton";
 import { ProfileStats } from "@/features/profile/components/profile-stats";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
-import { PageHeader } from "@/components/navigation/page-header";
+import { PageHeader } from "@/components/ui/page-header";
 
 export function UserProfileView({ handle }: { handle: string }) {
     const router = useRouter();
