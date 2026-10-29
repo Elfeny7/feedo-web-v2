@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { HomeIcon, SearchIcon, ProfileIcon } from "@/components/icons";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks/use-current-user";
 
 export function SidebarNav() {
   const pathname = usePathname();

@@ -1,9 +1,9 @@
 import type { UserData } from "@/types/auth";
 import { Avatar } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { useFollowAction } from "@/hooks/use-follow-action";
-import { UnfollowModal } from "@/components/modal/unfollow-modal";
+import { useCurrentUser } from "@/features/users/hooks/use-current-user";
+import { useFollowAction } from "@/features/follow/hooks/use-follow-action";
+import { UnfollowModal } from "@/features/follow/components/unfollow-modal";
 
 interface UserItemProps {
   suggestedUser: UserData;

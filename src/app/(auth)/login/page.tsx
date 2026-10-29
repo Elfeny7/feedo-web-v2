@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { AuthShell } from "@/components/auth/auth-shell";
+import { AuthShell } from "@/features/auth/components/auth-shell";
 import Link from "next/link";
-import { LoginForm } from "@/components/forms/login-form";
+import { LoginForm } from "@/features/auth/forms/login-form";
 
 export const metadata: Metadata = {
   title: "Sign in — Feedo",

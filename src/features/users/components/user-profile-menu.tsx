@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { useCurrentUser } from "@/features/users/hooks/use-current-user";
 import { Avatar } from "@/components/ui/avatar";
 import { LogoutIcon, MoreIcon } from "@/components/icons";
-import { useLogout } from "@/hooks/use-logout";
+import { useLogout } from "@/features/auth/hooks/use-logout";
 
 export function UserProfileMenu() {
   const { data: user } = useCurrentUser();

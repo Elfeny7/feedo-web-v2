@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useToggleFollow } from "@/hooks/use-toggle-follow";
+import { useToggleFollow } from "@/features/follow/hooks/use-toggle-follow";
 
 type UseFollowActionOptions = {
     isFollowed: boolean;

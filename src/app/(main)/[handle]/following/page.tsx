@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { UserFollowView } from "@/components/views/user-follow-view";
+import { UserFollowView } from "@/features/follow/view/user-follow-view";
 
 interface UserFollowingPageProps {
     params: Promise<{ handle: string }>;

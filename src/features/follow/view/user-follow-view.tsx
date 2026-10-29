@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useUserProfile } from "@/hooks/use-user-profile";
+import { useUserProfile } from "@/features/profile/hooks/use-user-profile";
 import { ChevronLeftIcon } from "@/components/icons";
-import { UserItem } from "@/components/widgets/user-item";
-import { UserItemSkeleton } from "@/components/widgets/user-item-skeleton";
+import { UserItem } from "@/features/users/components/user-item";
+import { UserItemSkeleton } from "@/features/users/components/user-item-skeleton";
 import { Tabs } from "@/components/ui/tabs";
-import { useFollowList } from "@/hooks/use-follow-list";
+import { useFollowList } from "@/features/follow/hooks/use-follow-list";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 
 type UserFollowViewProps = {

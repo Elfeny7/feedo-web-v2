@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SearchView } from "@/components/views/search-view";
+import { SearchView } from "@/features/search/view/search-view";
 
 export const metadata: Metadata = {
   title: "Explore | Feedo",

@@ -4,28 +4,15 @@ import Link from "next/link";
 import { LockIcon } from "@/components/icons";
 
 export interface AuthGateProps {
-  /** Judul ajakan login */
   title?: string;
-  /** Penjelasan tambahan mengapa pengguna harus login */
   description?: string;
-  /** URL tujuan login (mendukung parameter redirect jika diperlukan) */
   loginUrl?: string;
-  /** URL tujuan pendaftaran akun */
   registerUrl?: string;
-  /** Label untuk tombol login */
   loginLabel?: string;
-  /** Label untuk tombol register (opsional) */
   registerLabel?: string;
-  /** Kelas CSS kustom tambahan */
   className?: string;
 }
 
-/**
- * Komponen AuthGate
- * 
- * Menampilkan pesan dan tombol ajakan login bagi pengguna tamu (guest)
- * yang ingin melihat konten lebih lanjut atau berinteraksi lebih jauh.
- */
 export function AuthGate({
   title = "Log in to see more posts",
   description = "Join Feedo to view full profiles, like posts, and connect with the community.",

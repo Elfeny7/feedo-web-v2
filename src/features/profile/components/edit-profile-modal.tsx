@@ -6,7 +6,7 @@ import { XIcon, CameraIcon } from "@/components/icons";
 import { toast } from "react-hot-toast";
 import { ApiError } from "@/types/api";
 import { UserData } from "@/types/auth";
-import { useUpdateProfile } from "@/hooks/use-update-profile";
+import { useUpdateProfile } from "@/features/profile/hooks/use-update-profile";
 
 export interface EditProfileModalProps {
   isOpen: boolean;

@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
-import { useSearch } from "@/hooks/use-search";
-import { useSuggestion } from "@/hooks/use-suggestion";
+import { useSearch } from "@/features/search/hooks/use-search";
+import { useSuggestion } from "@/features/search/hooks/use-suggestion";
 import { SearchIcon } from "@/components/icons";
-import { UserItem } from "@/components/widgets/user-item";
-import { UserItemSkeleton } from "@/components/widgets/user-item-skeleton";
+import { UserItem } from "@/features/users/components/user-item";
+import { UserItemSkeleton } from "@/features/users/components/user-item-skeleton";
 
 export function SearchView() {
     const [query, setQuery] = useState("");

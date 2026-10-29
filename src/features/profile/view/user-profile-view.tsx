@@ -2,21 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PostItem } from "@/components/widgets/post-item";
+import { PostItem } from "@/features/posts/components/post-item";
 import { Avatar } from "@/components/ui/avatar";
 import { ChevronLeftIcon, DocumentIcon } from "@/components/icons";
-import { AuthGate } from "@/components/auth/auth-gate";
-import { GuestActionModal, GuestAction } from "@/components/modal/guest-action-modal";
-import { EditProfileModal } from "@/components/modal/edit-profile-modal";
-import { UnfollowModal } from "@/components/modal/unfollow-modal";
-import { useUserProfile } from "@/hooks/use-user-profile";
-import { useUserPosts } from "@/hooks/use-user-posts";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { useFollowAction } from "@/hooks/use-follow-action";
-import { useToggleLike } from "@/hooks/use-toggle-like";
-import { PostItemSkeleton } from "@/components/widgets/post-item-skeleton";
-import { ProfileInfoSkeleton } from "@/components/widgets/profile-info-skeleton";
-import { ProfileStats } from "@/components/widgets/profile-stats";
+import { AuthGate } from "@/features/auth/components/auth-gate";
+import { GuestActionModal, GuestAction } from "@/features/auth/components/guest-action-modal";
+import { EditProfileModal } from "@/features/profile/components/edit-profile-modal";
+import { UnfollowModal } from "@/features/follow/components/unfollow-modal";
+import { useUserProfile } from "@/features/profile/hooks/use-user-profile";
+import { useUserPosts } from "@/features/posts/hooks/use-user-posts";
+import { useCurrentUser } from "@/features/users/hooks/use-current-user";
+import { useFollowAction } from "@/features/follow/hooks/use-follow-action";
+import { useToggleLike } from "@/features/like/hooks/use-toggle-like";
+import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton";
+import { ProfileInfoSkeleton } from "@/features/profile/components/profile-info-skeleton";
+import { ProfileStats } from "@/features/profile/components/profile-stats";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 
 export function UserProfileView({ handle }: { handle: string }) {

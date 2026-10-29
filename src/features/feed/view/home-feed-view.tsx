@@ -2,14 +2,14 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useCurrentUser } from "@/hooks/use-current-user";
-import { PostItem } from "@/components/widgets/post-item";
-import { PostItemSkeleton } from "@/components/widgets/post-item-skeleton";
+import { useCurrentUser } from "@/features/users/hooks/use-current-user";
+import { PostItem } from "@/features/posts/components/post-item";
+import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton";
 import { Avatar } from "@/components/ui/avatar";
 import { DocumentIcon, ProgressRingIcon } from "@/components/icons";
-import { useFeed } from "@/hooks/use-feed";
-import { useCreatePost } from "@/hooks/use-create-post";
-import { useToggleLike } from "@/hooks/use-toggle-like";
+import { useFeed } from "@/features/feed/hooks/use-feed";
+import { useCreatePost } from "@/features/posts/hooks/use-create-post";
+import { useToggleLike } from "@/features/like/hooks/use-toggle-like";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { toast } from "react-hot-toast";
 
