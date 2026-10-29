@@ -12,6 +12,7 @@ import { useCreatePost } from "@/features/posts/hooks/use-create-post";
 import { useToggleLike } from "@/features/like/hooks/use-toggle-like";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { toast } from "react-hot-toast";
+import { PageHeader } from "@/components/navigation/page-header";
 
 const MAX_POST_LENGTH = 100;
 
@@ -77,10 +78,7 @@ export function HomeFeedView() {
 
   return (
     <>
-      {/* Header */}
-      <header className="sticky top-0 z-10 backdrop-blur-md bg-background/80 border-b border-border px-4 sm:px-6 h-15 flex items-center">
-        <h1 className="text-xl font-bold tracking-tight">Home</h1>
-      </header>
+      <PageHeader title="Home" />
 
       {/* Compose Area */}
       <div className="p-4 sm:px-6 border-b border-border flex gap-4">
@@ -140,10 +138,12 @@ export function HomeFeedView() {
 
       {/* Feed Posts */}
       <div className="flex flex-col">
-        {isLoading && posts.length === 0 ? (
+        {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => (
             <PostItemSkeleton key={i} />
           ))
+        ) : isError ? (
+          <div className="flex justify-center p-8 text-destructive">Failed to load posts.</div>
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border-b border-border">
             <div className="w-20 h-20 mb-4 rounded-full bg-muted flex items-center justify-center opacity-70">
@@ -154,8 +154,6 @@ export function HomeFeedView() {
               When someone posts something, it will show up here. Be the first to share what&apos;s on your mind!
             </p>
           </div>
-        ) : isError ? (
-          <div className="flex justify-center p-8 text-destructive">Failed to load posts.</div>
         ) : (
           posts.map((post) => (
             <PostItem

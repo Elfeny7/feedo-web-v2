@@ -7,6 +7,7 @@ import { useSuggestion } from "@/features/search/hooks/use-suggestion";
 import { SearchIcon } from "@/components/icons";
 import { UserItem } from "@/features/users/components/user-item";
 import { UserItemSkeleton } from "@/features/users/components/user-item-skeleton";
+import { PageHeader } from "@/components/navigation/page-header";
 
 export function SearchView() {
     const [query, setQuery] = useState("");
@@ -32,10 +33,7 @@ export function SearchView() {
 
     return (
         <>
-            {/* Header */}
-            <header className="sticky top-0 z-10 backdrop-blur-md bg-background/80 border-b border-border px-4 sm:px-6 h-15 flex items-center">
-                <h1 className="text-xl font-bold tracking-tight">Explore Users</h1>
-            </header>
+            <PageHeader title="Explore Users" />
 
             {/* Search Input Area */}
             <div className="p-4 sm:px-6 border-b border-border">

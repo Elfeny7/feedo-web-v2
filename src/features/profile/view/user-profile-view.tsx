@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { PostItem } from "@/features/posts/components/post-item";
 import { Avatar } from "@/components/ui/avatar";
-import { ChevronLeftIcon, DocumentIcon } from "@/components/icons";
+import { DocumentIcon } from "@/components/icons";
 import { AuthGate } from "@/features/auth/components/auth-gate";
 import { GuestActionModal, GuestAction } from "@/features/auth/components/guest-action-modal";
 import { EditProfileModal } from "@/features/profile/components/edit-profile-modal";
@@ -18,6 +18,7 @@ import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton
 import { ProfileInfoSkeleton } from "@/features/profile/components/profile-info-skeleton";
 import { ProfileStats } from "@/features/profile/components/profile-stats";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
+import { PageHeader } from "@/components/navigation/page-header";
 
 export function UserProfileView({ handle }: { handle: string }) {
     const router = useRouter();
@@ -92,21 +93,11 @@ export function UserProfileView({ handle }: { handle: string }) {
 
     return (
         <>
-            {/* Header */}
-            <header className="sticky top-0 z-10 backdrop-blur-md bg-background/80 border-b border-border px-4 sm:px-6 h-15 flex items-center gap-4">
-                <button
-                    onClick={() => router.back()}
-                    className="p-2 -ml-2 rounded-full hover:bg-muted transition-colors cursor-pointer"
-                    aria-label="Back"
-                >
-                    <ChevronLeftIcon className="w-5 h-5" />
-                </button>
-                {isLoading ? (
-                    <div className="h-5 w-28 bg-muted animate-pulse rounded-md"></div>
-                ) : (
-                    <h1 className="text-xl font-bold tracking-tight">{profile?.name}</h1>
-                )}
-            </header>
+            <PageHeader
+                title={profile?.name ?? ""}
+                isLoading={isLoading}
+                showBackButton
+            />
 
             {/* Cover Image */}
             <div className="h-32 sm:h-48 bg-linear-to-r from-teal-500 to-emerald-400 w-full relative"></div>
