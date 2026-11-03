@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { client } from "@/lib/fetcher";
+import { authApi } from "@/features/auth/api/auth-api";
 
 export function useLogout() {
     const queryClient = useQueryClient();
     const router = useRouter();
 
     return useMutation({
-        mutationFn: () => client.post("api/auth/logout"),
+        mutationFn: () => authApi.logout(),
         onSuccess: () => {
             queryClient.removeQueries({ queryKey: ["me"] });
             queryClient.setQueryData(["me"], null);

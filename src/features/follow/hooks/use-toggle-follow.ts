@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { client } from "@/lib/fetcher";
+import { followApi } from "@/features/follow/api/follow-api";
 import type { UserData } from "@/types/auth";
 import type { UserCollection } from "@/types/user";
 import type { InfiniteData } from "@tanstack/react-query";
@@ -49,7 +49,7 @@ function updateFollowList(
 export function useToggleFollow() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (handle: string) => client.post(`/api/users/${encodeURIComponent(handle)}/follow`),
+        mutationFn: async (handle: string) => followApi.toggleFollow(handle),
         onMutate: async (handle) => {
             await Promise.all([
                 queryClient.cancelQueries({

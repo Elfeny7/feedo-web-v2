@@ -1,12 +1,11 @@
-import { PostCollection } from "@/types/post";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { client } from "@/lib/fetcher";
+import { postsApi } from "@/features/posts/api/posts-api";
 
 export function useUserPosts(handle: string) {
     return useInfiniteQuery({
         queryKey: ["user-posts", handle],
         initialPageParam: 1,
-        queryFn: ({ pageParam }) => client.get<PostCollection>(`/api/users/${encodeURIComponent(handle)}/posts?page=${pageParam}`),
+        queryFn: ({ pageParam }) => postsApi.getUserPosts(handle, pageParam),
         getNextPageParam: (lastPage) => {
             const meta = lastPage?.data?.meta;
 

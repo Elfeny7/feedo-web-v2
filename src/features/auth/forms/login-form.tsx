@@ -7,7 +7,7 @@ import { TextField, PasswordField } from "@/components/ui/form-field";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { client } from "@/lib/fetcher";
+import { authApi } from "@/features/auth/api/auth-api";
 import { ApiError } from "@/types/api";
 import Link from "next/link";
 import * as z from "zod";
@@ -34,7 +34,7 @@ export function LoginForm() {
     const onSubmit = async (data: LoginFormValues) => {
         setLoading(true);
         try {
-            await client.post("/api/auth/login", { email: data.email, password: data.password });
+            await authApi.login(data.email, data.password);
             router.push("/home");
             router.refresh();
         } catch (err) {

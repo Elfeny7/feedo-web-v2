@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { Avatar } from "@/components/ui/avatar";
 import { ProgressRingIcon } from "@/components/icons";
-import { useCurrentUser } from "@/features/users/hooks/use-current-user";
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useCreatePost } from "@/features/posts/hooks/use-create-post";
 
 const MAX_POST_LENGTH = 100;

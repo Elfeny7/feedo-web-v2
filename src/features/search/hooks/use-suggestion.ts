@@ -1,12 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { client } from "@/lib/fetcher";
-import { UserData } from "@/types/auth";
+import { searchApi } from "@/features/search/api/search-api";
 
 export function useSuggestion(limit: string) {
     return useQuery({
         queryKey: ["suggestions"],
         queryFn: async () => {
-            const responseData = await client.get<UserData[]>(`/api/users/suggestions?limit=${limit}`);
+            const responseData = await searchApi.getSuggestions(limit);
             const suggestedUser = responseData?.data;
 
             return suggestedUser;

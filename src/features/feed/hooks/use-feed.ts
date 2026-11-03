@@ -1,12 +1,13 @@
-import { PostCollection } from "@/types/post";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { client } from "@/lib/fetcher";
+import { feedApi } from "@/features/feed/api/feed-api";
 
 export function useFeed() {
     return useInfiniteQuery({
         queryKey: ["feed"],
         initialPageParam: 1,
-        queryFn: ({ pageParam }) => client.get<PostCollection>(`/api/feed?page=${pageParam}`),
+        queryFn: ({ pageParam }) => {
+            return feedApi.getFeed(pageParam);
+        },
         getNextPageParam: (lastPage) => {
             const meta = lastPage?.data?.meta;
 

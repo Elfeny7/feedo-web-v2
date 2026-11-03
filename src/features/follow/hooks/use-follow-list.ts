@@ -1,14 +1,11 @@
-import { UserCollection } from "@/types/user";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { client } from "@/lib/fetcher";
+import { followApi } from "@/features/follow/api/follow-api";
 
 export function useFollowList(handle: string, type: "following" | "followers") {
     return useInfiniteQuery({
         queryKey: ["users", handle, type],
         initialPageParam: 1,
-        queryFn: ({ pageParam }) => client.get<UserCollection>(
-            `/api/users/${handle}/${type}?page=${pageParam}`
-        ),
+        queryFn: ({ pageParam }) => followApi.getFollowList(handle, type, pageParam),
         getNextPageParam: (lastPage) => {
             const meta = lastPage?.data?.meta;
 

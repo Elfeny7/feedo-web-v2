@@ -11,7 +11,7 @@ import { EditProfileModal } from "@/features/profile/components/edit-profile-mod
 import { UnfollowModal } from "@/features/follow/components/unfollow-modal";
 import { useUserProfile } from "@/features/profile/hooks/use-user-profile";
 import { useUserPosts } from "@/features/posts/hooks/use-user-posts";
-import { useCurrentUser } from "@/features/users/hooks/use-current-user";
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useFollowAction } from "@/features/follow/hooks/use-follow-action";
 import { useToggleLike } from "@/features/like/hooks/use-toggle-like";
 import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton";

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { useCurrentUser } from "@/features/users/hooks/use-current-user";
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { HomeIcon, SearchIcon, ProfileIcon, LogoutIcon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { useLogout } from "@/features/auth/hooks/use-logout";

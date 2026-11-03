@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { client } from "@/lib/fetcher";
+import { likeApi } from "@/features/like/api/like-api";
 import type { InfiniteData } from "@tanstack/react-query";
 import type { PostCollection } from "@/types/post";
 import type { ResponseData } from "@/types/api";
@@ -21,7 +21,7 @@ type ToggleLikeContext = {
 export function useToggleLike() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (postId: number) => client.post(`/api/post/${postId}/like`),
+        mutationFn: async (postId: number) => likeApi.toggleLike(postId),
         onMutate: async (postId): Promise<ToggleLikeContext> => {
             await Promise.all([
                 queryClient.cancelQueries({
