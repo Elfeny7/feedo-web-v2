@@ -4,6 +4,7 @@ import type { InfiniteData } from "@tanstack/react-query";
 import type { PostCollection } from "@/types/post";
 import type { ResponseData } from "@/types/api";
 import type { PostData } from "@/types/post";
+import { queryKeys } from "@/lib/query-keys";
 
 type FeedData = InfiniteData<
     ResponseData<PostCollection>,
@@ -25,15 +26,19 @@ export function useToggleLike() {
         onMutate: async (postId): Promise<ToggleLikeContext> => {
             await Promise.all([
                 queryClient.cancelQueries({
-                    queryKey: ["feed"],
+                    queryKey: queryKeys.feed.all,
                 }),
                 queryClient.cancelQueries({
-                    queryKey: ["user-posts"],
+                    queryKey: queryKeys.users.all,
+                    predicate: (query) => query.queryKey[2] === "posts",
                 }),
             ])
 
-            const previousFeed = queryClient.getQueryData<FeedData>(["feed"]);
-            const previousUserPosts = queryClient.getQueriesData<FeedData>({ queryKey: ["user-posts"] });
+            const previousFeed = queryClient.getQueryData<FeedData>(queryKeys.feed.all);
+            const previousUserPosts = queryClient.getQueriesData<FeedData>({
+                queryKey: queryKeys.users.all,
+                predicate: (query) => query.queryKey[2] === "posts",
+            });
 
             const togglePostLike = (oldData: FeedData | undefined): FeedData | undefined => {
                 if (!oldData) return oldData;
@@ -67,8 +72,14 @@ export function useToggleLike() {
                 };
             }
 
-            queryClient.setQueryData<FeedData>(["feed"], (oldData) => togglePostLike(oldData));
-            queryClient.setQueriesData<FeedData>({ queryKey: ["user-posts"] }, (oldData) => togglePostLike(oldData));
+            queryClient.setQueryData<FeedData>(queryKeys.feed.all, (oldData) => togglePostLike(oldData));
+            queryClient.setQueriesData<FeedData>(
+                {
+                    queryKey: queryKeys.users.all,
+                    predicate: (query) => query.queryKey[2] === "posts",
+                },
+                (oldData) => togglePostLike(oldData),
+            );
 
             return { previousFeed, previousUserPosts };
         },
@@ -76,7 +87,7 @@ export function useToggleLike() {
             if (!context) return;
             if (context?.previousFeed) {
                 queryClient.setQueryData(
-                    ["feed"],
+                    queryKeys.feed.all,
                     context.previousFeed
                 );
             }
@@ -86,7 +97,7 @@ export function useToggleLike() {
         },
         onSettled: () => {
             queryClient.invalidateQueries({
-                queryKey: ["feed"],
+                queryKey: queryKeys.feed.all,
             });
         },
     });

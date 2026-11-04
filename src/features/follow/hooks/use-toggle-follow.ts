@@ -4,6 +4,7 @@ import type { UserData } from "@/types/auth";
 import type { UserCollection } from "@/types/user";
 import type { InfiniteData } from "@tanstack/react-query";
 import type { ResponseData } from "@/types/api";
+import { queryKeys } from "@/lib/query-keys";
 
 function toggleFollowUser(user: UserData): UserData {
     const isFollowed = user.is_followed;
@@ -53,36 +54,39 @@ export function useToggleFollow() {
         onMutate: async (handle) => {
             await Promise.all([
                 queryClient.cancelQueries({
-                    queryKey: ["user-profile", handle],
+                    queryKey: queryKeys.users.detail(handle),
                 }),
                 queryClient.cancelQueries({
-                    queryKey: ["me"],
+                    queryKey: queryKeys.auth.currentUser,
                 }),
                 queryClient.cancelQueries({
-                    queryKey: ["suggestions"],
+                    queryKey: queryKeys.suggestions.all,
                 }),
                 queryClient.cancelQueries({
-                    queryKey: ["search"],
+                    queryKey: queryKeys.search.all,
                 }),
                 queryClient.cancelQueries({
-                    queryKey: ["users"],
+                    queryKey: queryKeys.users.all,
                 }),
             ]);
 
-            const me = queryClient.getQueryData<UserData>(["me"]);
+            const me = queryClient.getQueryData<UserData>(queryKeys.auth.currentUser);
             const myHandle = me?.handle;
 
-            const previousProfile = queryClient.getQueryData<UserData>(["user-profile", handle]);
-            const previousMe = myHandle ? queryClient.getQueryData<UserData>(["user-profile", myHandle]) : undefined;
-            const previousSuggestions = queryClient.getQueryData<UserData[]>(["suggestions"]);
+            const previousProfile = queryClient.getQueryData<UserData>(queryKeys.users.detail(handle));
+            const previousMe = myHandle ? queryClient.getQueryData<UserData>(queryKeys.users.detail(myHandle)) : undefined;
+            const previousSuggestions = queryClient.getQueryData<UserData[]>(queryKeys.suggestions.all);
             const previousSearch = queryClient.getQueriesData<UserData[]>({
-                queryKey: ["search"],
+                queryKey: queryKeys.search.all,
             });
             const previousUserLists =
                 queryClient.getQueriesData<
                     InfiniteData<ResponseData<UserCollection>>
                 >({
-                    queryKey: ["users"],
+                    queryKey: queryKeys.users.all,
+                    predicate: (query) =>
+                        query.queryKey[2] === "following" ||
+                        query.queryKey[2] === "followers",
                 });
 
             const userFromSearch = previousSearch
@@ -100,7 +104,7 @@ export function useToggleFollow() {
             const isCurrentlyFollowed = targetUser?.is_followed;
 
             queryClient.setQueryData<UserData>(
-                ["user-profile", handle],
+                queryKeys.users.detail(handle),
                 (oldData) => {
                     if (!oldData) return oldData;
 
@@ -114,7 +118,7 @@ export function useToggleFollow() {
                 myHandle
             ) {
                 queryClient.setQueryData<UserData>(
-                    ["user-profile", myHandle],
+                    queryKeys.users.detail(myHandle),
                     {
                         ...previousMe,
                         followings_count: Math.max(
@@ -127,7 +131,7 @@ export function useToggleFollow() {
             }
 
             queryClient.setQueryData<UserData[]>(
-                ["suggestions"],
+                queryKeys.suggestions.all,
                 (oldData) =>
                     oldData?.map((user) =>
                         user.handle === handle
@@ -137,7 +141,7 @@ export function useToggleFollow() {
             );
 
             queryClient.setQueriesData<UserData[]>(
-                { queryKey: ["search"] },
+                { queryKey: queryKeys.search.all },
                 (oldData) =>
                     oldData?.map((user) =>
                         user.handle === handle
@@ -157,21 +161,21 @@ export function useToggleFollow() {
         onError: (_error, handle, context) => {
             if (context?.previousProfile !== undefined) {
                 queryClient.setQueryData(
-                    ["user-profile", handle],
+                    queryKeys.users.detail(handle),
                     context.previousProfile
                 );
             }
 
             if (context?.previousMe !== undefined && context.myHandle) {
                 queryClient.setQueryData(
-                    ["user-profile", context.myHandle],
+                    queryKeys.users.detail(context.myHandle),
                     context.previousMe
                 );
             }
 
             if (context?.previousSuggestions !== undefined) {
                 queryClient.setQueryData(
-                    ["suggestions"],
+                    queryKeys.suggestions.all,
                     context.previousSuggestions
                 );
             }
@@ -184,18 +188,18 @@ export function useToggleFollow() {
         },
         onSettled: (_data, _error, handle, context) => {
             queryClient.invalidateQueries({
-                queryKey: ["user-profile", handle],
+                queryKey: queryKeys.users.detail(handle),
             });
             if (context?.myHandle) {
                 queryClient.invalidateQueries({
-                    queryKey: ["user-profile", context.myHandle],
+                    queryKey: queryKeys.users.detail(context.myHandle),
                 });
             }
             // queryClient.invalidateQueries({
-            //     queryKey: ["suggestions"],
+            //     queryKey: queryKeys.suggestions.all,
             // });
             queryClient.invalidateQueries({
-                queryKey: ["search"],
+                queryKey: queryKeys.search.all,
             });
         },
     });

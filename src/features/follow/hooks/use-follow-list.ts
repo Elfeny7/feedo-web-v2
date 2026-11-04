@@ -1,9 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { followApi } from "@/features/follow/api/follow-api";
+import { queryKeys } from "@/lib/query-keys";
 
 export function useFollowList(handle: string, type: "following" | "followers") {
     return useInfiniteQuery({
-        queryKey: ["users", handle, type],
+        queryKey: queryKeys.users.followList(handle, type),
         initialPageParam: 1,
         queryFn: ({ pageParam }) => followApi.getFollowList(handle, type, pageParam),
         getNextPageParam: (lastPage) => {

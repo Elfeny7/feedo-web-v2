@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { profileApi } from "@/features/profile/api/profile-api";
 import type { UpdateProfilePayload } from "@/types/user";
+import { queryKeys } from "@/lib/query-keys";
 
 export function useUpdateProfile(handle: string) {
     const queryClient = useQueryClient();
@@ -9,10 +10,10 @@ export function useUpdateProfile(handle: string) {
         mutationFn: (payload: UpdateProfilePayload) => profileApi.updateProfile(payload),
         onSuccess: async () => await Promise.all([
             queryClient.invalidateQueries({
-                queryKey: ["user-profile", handle],
+                queryKey: queryKeys.users.detail(handle),
             }),
             queryClient.invalidateQueries({
-                queryKey: ["user-posts", handle],
+                queryKey: queryKeys.users.posts(handle),
             }),
         ]),
     });

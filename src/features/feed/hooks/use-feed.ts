@@ -1,9 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { feedApi } from "@/features/feed/api/feed-api";
+import { queryKeys } from "@/lib/query-keys";
 
 export function useFeed() {
     return useInfiniteQuery({
-        queryKey: ["feed"],
+        queryKey: queryKeys.feed.all,
         initialPageParam: 1,
         queryFn: ({ pageParam }) => {
             return feedApi.getFeed(pageParam);

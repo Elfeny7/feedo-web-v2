@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { searchApi } from "@/features/search/api/search-api";
+import { queryKeys } from "@/lib/query-keys";
 
 export function useSearch(query: string) {
     return useQuery({
-        queryKey: ["search", query],
+        queryKey: queryKeys.search.query(query),
         queryFn: async () => {
             const responseData = await searchApi.searchUsers(query);
             const searchResult = responseData?.data;
