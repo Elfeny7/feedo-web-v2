@@ -205,6 +205,12 @@ export function UserProfileView({ handle }: { handle: string }) {
                                     router.push(`/${postHandle}`);
                                 }
                             }}
+                            onPostClick={() => {
+                                const postHandle = post.user.handle?.toLowerCase();
+                                if (postHandle) {
+                                    router.push(`/${postHandle}/post/${post.id}`);
+                                }
+                            }}
                         />
                     ))
                 )}

@@ -3,13 +3,14 @@
 import { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { Avatar } from "@/components/ui/avatar";
+import { ComposeButton } from "@/components/ui/compose-button";
 import { ProgressRingIcon } from "@/components/icons";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { useCreatePost } from "@/features/posts/hooks/use-create-post";
 
 const MAX_POST_LENGTH = 100;
 
-export function ComposeArea() {
+export function PostCompose() {
   const { data: user } = useCurrentUser();
   const { mutate: createPost, isPending: isCreatePostPending } = useCreatePost();
 
@@ -84,13 +85,11 @@ export function ComposeArea() {
                 </div>
               )}
 
-              <button
+              <ComposeButton
                 onClick={handlePost}
                 disabled={postContent.trim().length === 0 || postContent.length > MAX_POST_LENGTH || isCreatePostPending}
-                className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:hover:bg-primary text-primary-foreground font-bold py-2.5 px-6 rounded-full shadow-md shadow-primary/20 transition-all active:scale-95 text-sm cursor-pointer"
-              >
-                {isCreatePostPending ? "Posting..." : "Post"}
-              </button>
+                text={isCreatePostPending ? "Posting..." : "Post"}
+              />
             </div>
           </div>
         )}

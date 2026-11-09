@@ -6,6 +6,7 @@ export type PostData = {
     content: string | null
     user: UserData,
     likes_count: number,
+    comments_count?: number,
     is_liked: boolean,
     created_at: string,
     updated_at: string

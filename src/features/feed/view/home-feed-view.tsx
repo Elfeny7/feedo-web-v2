@@ -8,7 +8,7 @@ import { useFeed } from "@/features/feed/hooks/use-feed";
 import { useToggleLike } from "@/features/like/hooks/use-toggle-like";
 import { useInfiniteScroll } from "@/hooks/use-infinite-scroll";
 import { PageHeader } from "@/components/ui/page-header";
-import { ComposeArea } from "@/features/feed/components/compose-area";
+import { PostCompose } from "@/features/feed/components/post-compose";
 
 export function HomeFeedView() {
   const router = useRouter();
@@ -35,7 +35,7 @@ export function HomeFeedView() {
     <>
       <PageHeader title="Home" />
 
-      <ComposeArea />
+      <PostCompose />
 
       {/* Feed Posts */}
       <div className="flex flex-col">
@@ -65,6 +65,12 @@ export function HomeFeedView() {
                 const postHandle = post.user.handle?.toLowerCase();
                 if (postHandle) {
                   router.push(`/${postHandle}`);
+                }
+              }}
+              onPostClick={() => {
+                const postHandle = post.user.handle?.toLowerCase();
+                if (postHandle) {
+                  router.push(`/${postHandle}/post/${post.id}`);
                 }
               }}
             >
