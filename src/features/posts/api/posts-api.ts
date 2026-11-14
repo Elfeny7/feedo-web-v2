@@ -5,4 +5,5 @@ export const postsApi = {
   getUserPosts: (handle: string, page: number) =>
     client.get<PostCollection>(`/api/users/${encodeURIComponent(handle)}/posts?page=${page}`),
   createPost: (payload: CreatePostPayload) => client.post("/api/post", payload),
+  deletePost: (postId: number) => client.delete(`/api/post/${postId}`),
 };

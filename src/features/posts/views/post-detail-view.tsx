@@ -1,16 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { PageHeader } from "@/components/ui/page-header";
 import { Avatar } from "@/components/ui/avatar";
-import { CommentIcon, DocumentIcon, HeartIcon } from "@/components/icons";
+import {
+  CommentIcon,
+  DocumentIcon,
+  HeartIcon,
+  MoreIcon,
+  TrashIcon,
+} from "@/components/icons";
 import { formatRelativeTime } from "@/lib/helper/format-time";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { GuestActionModal, GuestAction } from "@/features/auth/components/guest-action-modal";
 import { useFeed } from "@/features/feed/hooks/use-feed";
 import { useUserPosts } from "@/features/posts/hooks/use-user-posts";
+import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
+import { DeletePostModal } from "@/features/posts/components/delete-post-modal";
 import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton";
 import { useToggleLike } from "@/features/like/hooks/use-toggle-like";
 import { CommentCompose } from "@/features/comments/components/comment-compose";
@@ -41,7 +49,28 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
     action: "like",
   });
 
+  const [showPostMenu, setShowPostMenu] = useState(false);
+  const postMenuRef = useRef<HTMLDivElement>(null);
+  const [isDeletePostModalOpen, setIsDeletePostModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        postMenuRef.current &&
+        !postMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowPostMenu(false);
+      }
+    }
+
+    if (showPostMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showPostMenu]);
 
   // Cari data post dari cache/query feed maupun user posts
   const { data: feedData, isLoading: isLoadingFeed } = useFeed();
@@ -54,8 +83,10 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
     userPosts.find((p) => p.id === postId);
 
   const isLoadingPost = !post && (isLoadingFeed || isLoadingUserPosts);
+  const isPostOwner = Boolean(currentUser && post && post.user.id === currentUser.id);
 
   const { mutate: togglePostLike } = useToggleLike();
+  const { mutate: deletePost, isPending: isDeletingPost } = useDeletePost();
 
   // Comments query & mutations
   const {
@@ -104,6 +135,20 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
       return;
     }
     togglePostLike(post.id);
+  };
+
+  const handleConfirmDeletePost = () => {
+    if (!post) return;
+
+    deletePost(post.id, {
+      onSuccess: () => {
+        setIsDeletePostModalOpen(false);
+        router.back();
+      },
+      onError: () => {
+        toast.error("Failed to delete post. Please try again.");
+      },
+    });
   };
 
   const handleToggleCommentLike = (commentId: number) => {
@@ -177,24 +222,55 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
       ) : (
         <article className="pt-4 pb-2 px-4 sm:px-6 border-b border-border flex flex-col gap-3">
           {/* Author Header */}
-          <div className="flex items-center gap-3">
-            <div
-              onClick={() => handleNavigateUser(post.user.handle)}
-              className="cursor-pointer shrink-0"
-            >
-              <Avatar name={post.user.name} />
-            </div>
-            <div className="flex flex-col leading-tight">
-              <h2
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div
                 onClick={() => handleNavigateUser(post.user.handle)}
-                className="font-bold hover:underline cursor-pointer text-[15px]"
+                className="cursor-pointer shrink-0"
               >
-                {post.user.name}
-              </h2>
-              <span className="text-muted-foreground text-sm">
-                @{post.user.handle}
-              </span>
+                <Avatar name={post.user.name} />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <h2
+                  onClick={() => handleNavigateUser(post.user.handle)}
+                  className="font-bold hover:underline cursor-pointer text-[15px]"
+                >
+                  {post.user.name}
+                </h2>
+                <span className="text-muted-foreground text-sm">
+                  @{post.user.handle}
+                </span>
+              </div>
             </div>
+
+            {isPostOwner && (
+              <div className="relative" ref={postMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowPostMenu((prev) => !prev)}
+                  className="p-1.5 -mr-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                  aria-label="Post options"
+                >
+                  <MoreIcon className="w-5 h-5" />
+                </button>
+
+                {showPostMenu && (
+                  <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg shadow-black/10 overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-150">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPostMenu(false);
+                        setIsDeletePostModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-muted transition-colors text-destructive font-bold text-sm cursor-pointer"
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Post Content */}
@@ -252,6 +328,14 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
         onLikeComment={handleToggleCommentLike}
         onDeleteComment={(commentId) => setCommentToDelete(commentId)}
         onUserClick={handleNavigateUser}
+      />
+
+      {/* Delete Post Confirmation Modal */}
+      <DeletePostModal
+        isOpen={isDeletePostModalOpen}
+        onClose={() => setIsDeletePostModalOpen(false)}
+        onConfirm={handleConfirmDeletePost}
+        isPending={isDeletingPost}
       />
 
       {/* Delete Comment Confirmation Modal */}

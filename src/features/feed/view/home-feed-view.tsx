@@ -1,8 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import { PostItem } from "@/features/posts/components/post-item";
 import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton";
+import { DeletePostModal } from "@/features/posts/components/delete-post-modal";
+import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
+import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
 import { DocumentIcon } from "@/components/icons";
 import { useFeed } from "@/features/feed/hooks/use-feed";
 import { useToggleLike } from "@/features/like/hooks/use-toggle-like";
@@ -12,6 +17,9 @@ import { PostCompose } from "@/features/feed/components/post-compose";
 
 export function HomeFeedView() {
   const router = useRouter();
+  const { data: currentUser } = useCurrentUser();
+  const [postToDelete, setPostToDelete] = useState<number | null>(null);
+
   const {
     data,
     isLoading,
@@ -22,6 +30,7 @@ export function HomeFeedView() {
   } = useFeed();
 
   const { mutate: toggleLike } = useToggleLike();
+  const { mutate: deletePost, isPending: isDeletingPost } = useDeletePost();
 
   const loadMoreRef = useInfiniteScroll({
     hasNextPage,
@@ -30,6 +39,19 @@ export function HomeFeedView() {
   });
 
   const posts = data?.pages.flatMap((page) => page?.data?.data ?? [],) ?? [];
+
+  const handleConfirmDeletePost = () => {
+    if (postToDelete === null) return;
+
+    deletePost(postToDelete, {
+      onSuccess: () => {
+        setPostToDelete(null);
+      },
+      onError: () => {
+        toast.error("Failed to delete post. Please try again.");
+      },
+    });
+  };
 
   return (
     <>
@@ -60,7 +82,9 @@ export function HomeFeedView() {
             <PostItem
               key={post.id}
               post={post}
+              isOwner={Boolean(currentUser && post.user.id === currentUser.id)}
               onLike={() => toggleLike(post.id)}
+              onDelete={() => setPostToDelete(post.id)}
               onUserClick={() => {
                 const postHandle = post.user.handle?.toLowerCase();
                 if (postHandle) {
@@ -73,8 +97,7 @@ export function HomeFeedView() {
                   router.push(`/${postHandle}/post/${post.id}`);
                 }
               }}
-            >
-            </PostItem>
+            />
           ))
         )}
         <div ref={loadMoreRef} />
@@ -84,6 +107,13 @@ export function HomeFeedView() {
           ))
         )}
       </div>
+
+      <DeletePostModal
+        isOpen={postToDelete !== null}
+        onClose={() => setPostToDelete(null)}
+        onConfirm={handleConfirmDeletePost}
+        isPending={isDeletingPost}
+      />
     </>
   );
 }

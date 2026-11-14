@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import { PostItem } from "@/features/posts/components/post-item";
+import { DeletePostModal } from "@/features/posts/components/delete-post-modal";
+import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
 import { Avatar } from "@/components/ui/avatar";
 import { DocumentIcon } from "@/components/icons";
 import { AuthGate } from "@/features/auth/components/auth-gate";
@@ -24,6 +27,7 @@ export function UserProfileView({ handle }: { handle: string }) {
     const router = useRouter();
     const { data: user, isLoading: isLoadingUser } = useCurrentUser();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
     const [authModal, setAuthModal] = useState<{
         isOpen: boolean;
@@ -46,6 +50,7 @@ export function UserProfileView({ handle }: { handle: string }) {
     });
 
     const { mutate: toggleLike } = useToggleLike();
+    const { mutate: deletePost, isPending: isDeletingPost } = useDeletePost();
 
     const {
         data,
@@ -89,6 +94,19 @@ export function UserProfileView({ handle }: { handle: string }) {
             return;
         }
         toggleLike(postId);
+    };
+
+    const handleConfirmDeletePost = () => {
+        if (postToDelete === null) return;
+
+        deletePost(postToDelete, {
+            onSuccess: () => {
+                setPostToDelete(null);
+            },
+            onError: () => {
+                toast.error("Failed to delete post. Please try again.");
+            },
+        });
     };
 
     return (
@@ -198,7 +216,9 @@ export function UserProfileView({ handle }: { handle: string }) {
                         <PostItem
                             key={post.id}
                             post={post}
+                            isOwner={Boolean(user && post.user.id === user.id)}
                             onLike={() => handleLikeClick(post.id)}
+                            onDelete={() => setPostToDelete(post.id)}
                             onUserClick={() => {
                                 const postHandle = post.user.handle?.toLowerCase();
                                 if (postHandle) {
@@ -248,6 +268,13 @@ export function UserProfileView({ handle }: { handle: string }) {
                 onConfirm={followAction.handleUnfollowConfirm}
                 userName={profile?.name || handle}
                 isPending={followAction.isPending}
+            />
+
+            <DeletePostModal
+                isOpen={postToDelete !== null}
+                onClose={() => setPostToDelete(null)}
+                onConfirm={handleConfirmDeletePost}
+                isPending={isDeletingPost}
             />
 
             {/* Pop-up Dialog Edit Profil */}
