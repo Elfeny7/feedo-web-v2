@@ -19,3 +19,4 @@ export * from "./progress-ring-icon";
 export * from "./x-icon";
 export * from "./camera-icon";
 export * from "./comment-icon";
+export * from "./trash-icon";

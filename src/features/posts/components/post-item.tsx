@@ -1,5 +1,5 @@
 import type { PostData } from "@/types/post";
-import { HeartIcon } from "@/components/icons";
+import { CommentIcon, HeartIcon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { formatRelativeTime } from "@/lib/helper/format-time";
 
@@ -43,15 +43,29 @@ export function PostItem({ post, onLike, onUserClick, onPostClick }: PostItemPro
         </p>
 
         {/* Post Actions */}
-        <div className="flex items-center mt-1 text-muted-foreground">
+        <div className="flex items-center gap-6 mt-1 text-muted-foreground">
           <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPostClick?.();
+            }}
+            className="-ml-2 hover:text-primary transition-colors hover:bg-primary/10 p-2 rounded-full flex items-center gap-2 text-sm group cursor-pointer"
+          >
+            <CommentIcon />
+            <span className="group-hover:text-primary">{post.comments_count ?? 0}</span>
+          </button>
+
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onLike?.();
             }}
-            className={`-ml-2 hover:text-destructive transition-colors hover:bg-destructive/10 p-2 rounded-full flex items-center gap-2 text-sm group cursor-pointer ${post.is_liked ? 'text-destructive' : ''}`}
+            className={`hover:text-destructive transition-colors hover:bg-destructive/10 p-2 rounded-full flex items-center gap-2 text-sm group cursor-pointer ${post.is_liked ? 'text-destructive' : ''}`}
           >
-            <HeartIcon filled={post.is_liked} /> <span className="group-hover:text-destructive">{post.likes_count}</span>
+            <HeartIcon filled={post.is_liked} />
+            <span className="group-hover:text-destructive">{post.likes_count}</span>
           </button>
         </div>
       </div>

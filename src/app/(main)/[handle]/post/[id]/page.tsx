@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PostDetailView } from "@/features/posts/views/post-detail-view";
 
 interface PostDetailPageProps {
-    params: Promise<{ handle: string }>;
+    params: Promise<{ handle: string; id: string }>;
 }
 
 export async function generateMetadata({ params }: PostDetailPageProps): Promise<Metadata> {
@@ -14,9 +14,13 @@ export async function generateMetadata({ params }: PostDetailPageProps): Promise
     return {
         title: `@${cleanHandle}'s Post`,
         description: "View user post on Feedo.",
-    }
+    };
 }
 
-export default function PostDetailPage() {
-  return <PostDetailView />;
+export default async function PostDetailPage({ params }: PostDetailPageProps) {
+    const { handle, id } = await params;
+    const cleanHandle = decodeURIComponent(handle).replace(/^@/, "");
+    const postId = Number(id);
+
+    return <PostDetailView handle={cleanHandle} postId={postId} />;
 }

@@ -10,12 +10,14 @@ const MAX_COMMENT_LENGTH = 100;
 interface CommentComposeProps {
   currentUserName?: string;
   replyingToHandle?: string;
-  onSubmit?: (content: string) => void;
+  isPending?: boolean;
+  onSubmit?: (content: string, onSuccessCallback: () => void) => void;
 }
 
 export function CommentCompose({
-  currentUserName = "You",
+  currentUserName,
   replyingToHandle,
+  isPending = false,
   onSubmit,
 }: CommentComposeProps) {
   const [content, setContent] = useState("");
@@ -30,14 +32,19 @@ export function CommentCompose({
     }
   };
 
-  const handleSubmit = () => {
-    if (!content.trim() || content.length > MAX_COMMENT_LENGTH) return;
-    onSubmit?.(content.trim());
+  const resetCompose = () => {
     setContent("");
     setIsFocused(false);
     if (textareaRef.current) {
       textareaRef.current.style.height = "40px";
     }
+  };
+
+  const handleSubmit = () => {
+    if (!content.trim() || content.length > MAX_COMMENT_LENGTH || isPending) {
+      return;
+    }
+    onSubmit?.(content.trim(), resetCompose);
   };
 
   return (
@@ -46,7 +53,8 @@ export function CommentCompose({
       <div className="flex-1 flex flex-col gap-3">
         {(isFocused || content.length > 0) && replyingToHandle && (
           <span className="text-xs text-muted-foreground">
-            Replying to <span className="text-primary font-medium">@{replyingToHandle}</span>
+            Replying to{" "}
+            <span className="text-primary font-medium">@{replyingToHandle}</span>
           </span>
         )}
         <textarea
@@ -94,9 +102,10 @@ export function CommentCompose({
                 onClick={handleSubmit}
                 disabled={
                   content.trim().length === 0 ||
-                  content.length > MAX_COMMENT_LENGTH
+                  content.length > MAX_COMMENT_LENGTH ||
+                  isPending
                 }
-                text="Reply"
+                text={isPending ? "Replying..." : "Reply"}
               />
             </div>
           </div>

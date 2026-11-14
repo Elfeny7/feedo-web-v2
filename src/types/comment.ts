@@ -12,3 +12,21 @@ export type CommentData = {
 };
 
 export type CommentCollection = PaginatedResponse<CommentData>;
+
+export type CreateCommentPayload = {
+    content: string;
+};
+
+export type CreateComment = {
+    id: number;
+    content: string;
+    user: UserData;
+    likes_count: number;
+    is_liked: boolean;
+    created_at: string;
+    updated_at: string;
+};
+
+export type ToggleCommentLike = {
+    status: "liked" | "unliked";
+};

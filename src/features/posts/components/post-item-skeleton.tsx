@@ -19,8 +19,9 @@ export function PostItemSkeleton() {
                     <Skeleton className="h-3.5 w-3/4 max-w-sm" />
                 </div>
 
-                {/* Action */}
-                <div className="pt-2">
+                {/* Actions */}
+                <div className="pt-2 flex items-center gap-6">
+                    <Skeleton className="h-4 w-12" />
                     <Skeleton className="h-4 w-12" />
                 </div>
             </div>

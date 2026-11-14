@@ -14,6 +14,10 @@ export const queryKeys = {
   feed: {
     all: ["feed"] as const,
   },
+  comments: {
+    all: ["comments"] as const,
+    byPost: (postId: number) => [...queryKeys.comments.all, postId] as const,
+  },
   search: {
     all: ["search"] as const,
     query: (query: string) => [...queryKeys.search.all, query] as const,
