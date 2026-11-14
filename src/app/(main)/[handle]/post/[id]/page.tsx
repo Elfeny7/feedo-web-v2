@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { PostDetailView } from "@/features/posts/views/post-detail-view";
 
 interface PostDetailPageProps {
@@ -21,6 +22,10 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
     const { handle, id } = await params;
     const cleanHandle = decodeURIComponent(handle).replace(/^@/, "");
     const postId = Number(id);
+
+    if (Number.isNaN(postId) || postId <= 0) {
+        notFound();
+    }
 
     return <PostDetailView handle={cleanHandle} postId={postId} />;
 }

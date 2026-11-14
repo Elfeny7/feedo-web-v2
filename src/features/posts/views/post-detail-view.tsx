@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { PageHeader } from "@/components/ui/page-header";
 import { Avatar } from "@/components/ui/avatar";
 import {
   CommentIcon,
-  DocumentIcon,
   HeartIcon,
   MoreIcon,
   TrashIcon,
@@ -51,6 +50,7 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
 
   const [showPostMenu, setShowPostMenu] = useState(false);
   const postMenuRef = useRef<HTMLDivElement>(null);
+  const [isDeleted, setIsDeleted] = useState(false);
   const [isDeletePostModalOpen, setIsDeletePostModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
 
@@ -86,7 +86,11 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
   const isPostOwner = Boolean(currentUser && post && post.user.id === currentUser.id);
 
   const { mutate: togglePostLike } = useToggleLike();
-  const { mutate: deletePost, isPending: isDeletingPost } = useDeletePost();
+  const {
+    mutate: deletePost,
+    isPending: isDeletingPost,
+    isSuccess: isDeletePostSuccess,
+  } = useDeletePost();
 
   // Comments query & mutations
   const {
@@ -109,6 +113,17 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
     isFetchingNextPage: isFetchingNextComments,
     fetchNextPage: fetchNextComments,
   });
+
+  // Jika loading selesai dan post tidak ditemukan (dan bukan karena baru saja dihapus oleh pemiliknya), arahkan ke halaman 404 NotFound
+  if (
+    !isLoadingPost &&
+    !post &&
+    !isDeleted &&
+    !isDeletingPost &&
+    !isDeletePostSuccess
+  ) {
+    notFound();
+  }
 
   const comments =
     commentsData?.pages.flatMap((page) => page?.data?.data ?? []) ?? [];
@@ -140,12 +155,14 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
   const handleConfirmDeletePost = () => {
     if (!post) return;
 
+    setIsDeleted(true);
     deletePost(post.id, {
       onSuccess: () => {
         setIsDeletePostModalOpen(false);
         router.back();
       },
       onError: () => {
+        setIsDeleted(false);
         toast.error("Failed to delete post. Please try again.");
       },
     });
@@ -205,20 +222,8 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
       <PageHeader title="Post" showBackButton />
 
       {/* Main Post Detail */}
-      {isLoadingPost ? (
+      {isLoadingPost || !post ? (
         <PostItemSkeleton />
-      ) : !post ? (
-        <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground border-b border-border">
-          <div className="w-16 h-16 mb-4 rounded-full bg-muted flex items-center justify-center opacity-70">
-            <DocumentIcon className="w-7 h-7" />
-          </div>
-          <h3 className="text-lg font-bold text-foreground mb-1">
-            Post not found
-          </h3>
-          <p className="max-w-70 text-sm">
-            This post may have been removed or is not available in the current feed.
-          </p>
-        </div>
       ) : (
         <article className="pt-4 pb-2 px-4 sm:px-6 border-b border-border flex flex-col gap-3">
           {/* Author Header */}

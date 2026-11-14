@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { PostItem } from "@/features/posts/components/post-item";
 import { DeletePostModal } from "@/features/posts/components/delete-post-modal";
@@ -42,7 +42,11 @@ export function UserProfileView({ handle }: { handle: string }) {
     const isSelf = Boolean(user && userSelfHandle && userSelfHandle === handle.toLowerCase());
     const isGuest = !user;
 
-    const { data: profile, isLoading: isLoadingProfile } = useUserProfile(handle);
+    const {
+        data: profile,
+        isLoading: isLoadingProfile,
+        isError: isProfileError,
+    } = useUserProfile(handle);
 
     const followAction = useFollowAction({
         isFollowed: profile?.is_followed ?? false,
@@ -68,6 +72,11 @@ export function UserProfileView({ handle }: { handle: string }) {
         isFetchingNextPage,
         fetchNextPage,
     });
+
+    // Jika profil tidak ditemukan (404 / null), arahkan ke halaman 404 NotFound
+    if (!isLoadingProfile && (isProfileError || !profile)) {
+        notFound();
+    }
 
     const posts = data?.pages.flatMap((page) => page?.data?.data ?? [],) ?? [];
 

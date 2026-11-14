@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { useUserProfile } from "@/features/profile/hooks/use-user-profile";
 import { UserItem } from "@/features/users/components/user-item";
 import { UserItemSkeleton } from "@/features/users/components/user-item-skeleton";
@@ -35,6 +35,10 @@ export function UserFollowView({ handle, type }: UserFollowViewProps) {
         isFetchingNextPage: followListQuery.isFetchingNextPage,
         fetchNextPage: followListQuery.fetchNextPage,
     });
+
+    if (!userProfileQuery.isLoading && (userProfileQuery.isError || !profile)) {
+        notFound();
+    }
 
     return (
         <>
