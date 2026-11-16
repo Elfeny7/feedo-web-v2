@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { HeartIcon, LockIcon, UserIcon } from "@/components/icons";
+import { CommentIcon, HeartIcon, LockIcon, UserIcon } from "@/components/icons";
 import { ActionModal } from "@/components/modal/action-modal";
 
-export type GuestAction = "like" | "follow" | "post" | "custom";
+export type GuestAction =
+  | "like"
+  | "follow"
+  | "following"
+  | "followers"
+  | "post"
+  | "custom";
 
 export interface GuestActionModalProps {
   isOpen: boolean;
@@ -53,6 +59,40 @@ export function GuestActionModal({
     icon = (
       <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary ring-8 ring-primary/5">
         <UserIcon className="h-7 w-7" />
+      </div>
+    );
+  } else if (action === "following") {
+    defaultTitle = targetName
+      ? `See who ${targetName} follows`
+      : "See who they follow";
+    defaultDescription = targetName
+      ? `Log in or create an account to see the people ${targetName} is following on Feedo.`
+      : "Log in or create an account to view following lists.";
+    icon = (
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary ring-8 ring-primary/5">
+        <UserIcon className="h-7 w-7" />
+      </div>
+    );
+  } else if (action === "followers") {
+    defaultTitle = targetName
+      ? `See ${targetName}'s followers`
+      : "See their followers";
+    defaultDescription = targetName
+      ? `Log in or create an account to see who follows ${targetName} on Feedo.`
+      : "Log in or create an account to view followers lists.";
+    icon = (
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary ring-8 ring-primary/5">
+        <UserIcon className="h-7 w-7" />
+      </div>
+    );
+  } else if (action === "post") {
+    defaultTitle = "Join the conversation";
+    defaultDescription = targetName
+      ? `Log in or create an account to view ${targetName}'s full post and read the replies.`
+      : "Log in or create an account to view full posts, read replies, and join the conversation.";
+    icon = (
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary ring-8 ring-primary/5">
+        <CommentIcon className="h-7 w-7" />
       </div>
     );
   }

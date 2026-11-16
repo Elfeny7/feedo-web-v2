@@ -93,6 +93,32 @@ export function UserProfileView({ handle }: { handle: string }) {
         followAction.handleFollowClick();
     };
 
+    const handleFollowingClick = () => {
+        if (isGuest) {
+            setAuthModal({
+                isOpen: true,
+                action: "following",
+                targetName: profile?.name,
+            });
+            return;
+        }
+
+        router.push(`/${handle}/following`);
+    };
+
+    const handleFollowersClick = () => {
+        if (isGuest) {
+            setAuthModal({
+                isOpen: true,
+                action: "followers",
+                targetName: profile?.name,
+            });
+            return;
+        }
+
+        router.push(`/${handle}/followers`);
+    };
+
     const handleLikeClick = (postId: number) => {
         if (isGuest) {
             setAuthModal({
@@ -103,6 +129,22 @@ export function UserProfileView({ handle }: { handle: string }) {
             return;
         }
         toggleLike(postId);
+    };
+
+    const handlePostClick = (postHandle: string | undefined, postId: number) => {
+        if (isGuest) {
+            setAuthModal({
+                isOpen: true,
+                action: "post",
+                targetName: profile?.name,
+            });
+            return;
+        }
+
+        const cleanHandle = postHandle?.toLowerCase();
+        if (cleanHandle) {
+            router.push(`/${cleanHandle}/post/${postId}`);
+        }
     };
 
     const handleConfirmDeletePost = () => {
@@ -177,8 +219,8 @@ export function UserProfileView({ handle }: { handle: string }) {
                             followingsCount={profile?.followings_count}
                             followersCount={profile?.followers_count}
                             postsCount={profile?.posts_count}
-                            onFollowingClick={() => router.push(`/${handle}/following`)}
-                            onFollowersClick={() => router.push(`/${handle}/followers`)}
+                            onFollowingClick={handleFollowingClick}
+                            onFollowersClick={handleFollowersClick}
                         />
 
                         {/* Tombol Follow / Following (Hanya tampil jika membuka profil pengguna lain) */}
@@ -234,12 +276,7 @@ export function UserProfileView({ handle }: { handle: string }) {
                                     router.push(`/${postHandle}`);
                                 }
                             }}
-                            onPostClick={() => {
-                                const postHandle = post.user.handle?.toLowerCase();
-                                if (postHandle) {
-                                    router.push(`/${postHandle}/post/${post.id}`);
-                                }
-                            }}
+                            onPostClick={() => handlePostClick(post.user.handle, post.id)}
                         />
                     ))
                 )}
