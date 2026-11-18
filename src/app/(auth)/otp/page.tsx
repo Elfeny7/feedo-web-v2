@@ -30,10 +30,14 @@ export default async function OtpPage({ searchParams }: OtpPageProps) {
         <>
           Entered the wrong email?{" "}
           <Link
-            href="/register"
+            href={
+              otpType === "reset_password" ? "/forgot-password" : "/register"
+            }
             className="font-medium text-primary hover:text-primary/80"
           >
-            Go back to sign up
+            {otpType === "reset_password"
+              ? "Go back to forgot password"
+              : "Go back to sign up"}
           </Link>
         </>
       }

@@ -69,7 +69,7 @@ export function LoginForm() {
                 <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-foreground">Password</span>
                     <Link
-                        href="/reset-password"
+                        href="/forgot-password"
                         className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
                     >
                         Forgot password?

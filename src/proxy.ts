@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const protectedRoutes = ["/home"];
-const authRoutes = ["/login", "/register", "/otp"];
+const authRoutes = [
+    "/login",
+    "/register",
+    "/otp",
+    "/forgot-password",
+    "/reset-password",
+];
 
 export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
@@ -39,6 +45,8 @@ export const config = {
         "/home/:path*",
         "/login",
         "/register",
-        "/otp"
+        "/otp",
+        "/forgot-password",
+        "/reset-password"
     ]
 }

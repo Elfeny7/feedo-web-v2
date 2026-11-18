@@ -150,8 +150,15 @@ export function OtpForm({ email, type = "registration" }: OtpFormProps) {
 
     try {
       await authApi.verifyOtp(email, otpCode, type);
-      toast.success("Email verified successfully! Please sign in.");
-      router.push("/login");
+      if (type === "reset_password") {
+        toast.success("OTP verified! Please enter your new password.");
+        router.push(
+          `/reset-password?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otpCode)}`
+        );
+      } else {
+        toast.success("Email verified successfully! Please sign in.");
+        router.push("/login");
+      }
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         const rawResponse =
