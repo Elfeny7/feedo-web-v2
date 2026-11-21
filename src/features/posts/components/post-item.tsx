@@ -53,7 +53,7 @@ export function PostItem({
         }}
         className="cursor-pointer shrink-0"
       >
-        <Avatar name={post.user.name} />
+        <Avatar name={post.user.name} imageUrl={post.user.avatar} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">

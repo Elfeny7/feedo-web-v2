@@ -73,6 +73,7 @@ export function MobileNav() {
           >
             <Avatar
               name={user.name}
+              imageUrl={user.avatar}
               className="w-7 h-7 shadow-md text-primary-foreground bg-primary text-xs"
               fallbackClassName="bg-primary text-primary-foreground"
             />

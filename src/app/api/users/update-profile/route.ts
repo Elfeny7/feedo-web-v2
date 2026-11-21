@@ -6,12 +6,17 @@ import { UserData } from "@/types/auth";
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
+        const incomingFormData = await request.formData();
 
-        const responseData = await requestWithRefresh((token: string) => backend.put<UserData>("/users/update-profile", token, {
-            name: body.name,
-            bio: body.bio
-        }));
+        const responseData = await requestWithRefresh((token: string) => {
+            const outgoingFormData = new FormData();
+            incomingFormData.forEach((value, key) => {
+                outgoingFormData.append(key, value);
+            });
+
+            return backend.post<UserData>("/users/update-profile", token, outgoingFormData);
+        });
+
         const nextResponse = NextResponse.json(responseData);
 
         return nextResponse;
@@ -29,6 +34,5 @@ export async function POST(request: Request) {
             { success: false, message: err instanceof Error ? err.message : "Internal Server Error" },
             { status: 500 }
         );
-
     }
 }

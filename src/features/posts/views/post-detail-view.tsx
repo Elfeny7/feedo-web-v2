@@ -233,7 +233,7 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
                 onClick={() => handleNavigateUser(post.user.handle)}
                 className="cursor-pointer shrink-0"
               >
-                <Avatar name={post.user.name} />
+                <Avatar name={post.user.name} imageUrl={post.user.avatar} />
               </div>
               <div className="flex flex-col leading-tight">
                 <h2
@@ -315,6 +315,7 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
       {!isGuest && (
         <CommentCompose
           currentUserName={currentUser?.name}
+          currentUserAvatar={currentUser?.avatar}
           replyingToHandle={post?.user.handle ?? handle}
           isPending={isCreatingComment}
           onSubmit={handleAddComment}

@@ -9,6 +9,7 @@ const MAX_COMMENT_LENGTH = 100;
 
 interface CommentComposeProps {
   currentUserName?: string;
+  currentUserAvatar?: string | null;
   replyingToHandle?: string;
   isPending?: boolean;
   onSubmit?: (content: string, onSuccessCallback: () => void) => void;
@@ -16,6 +17,7 @@ interface CommentComposeProps {
 
 export function CommentCompose({
   currentUserName,
+  currentUserAvatar,
   replyingToHandle,
   isPending = false,
   onSubmit,
@@ -49,7 +51,7 @@ export function CommentCompose({
 
   return (
     <div className="p-4 sm:px-6 border-b border-border flex gap-4">
-      <Avatar name={currentUserName} />
+      <Avatar name={currentUserName} imageUrl={currentUserAvatar} />
       <div className="flex-1 flex flex-col gap-3">
         {(isFocused || content.length > 0) && replyingToHandle && (
           <span className="text-xs text-muted-foreground">

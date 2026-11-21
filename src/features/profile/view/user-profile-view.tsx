@@ -169,7 +169,16 @@ export function UserProfileView({ handle }: { handle: string }) {
             />
 
             {/* Cover Image */}
-            <div className="h-32 sm:h-48 bg-linear-to-r from-teal-500 to-emerald-400 w-full relative"></div>
+            <div className="h-32 sm:h-48 bg-linear-to-r from-teal-500 to-emerald-400 w-full relative overflow-hidden">
+                {profile?.banner && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={profile.banner}
+                        alt={`${profile.name}'s banner`}
+                        className="w-full h-full object-cover"
+                    />
+                )}
+            </div>
 
             {/* Profile Info */}
             <div className="px-4 sm:px-6 pb-8 border-b border-border relative flex flex-col items-start text-left">
@@ -198,6 +207,7 @@ export function UserProfileView({ handle }: { handle: string }) {
                         {/* Avatar */}
                         <Avatar
                             name={profile?.name || "?"}
+                            imageUrl={profile?.avatar}
                             className="self-center w-24 h-24 sm:w-32 sm:h-32 border-4 border-background mt-[-12%] sm:mt-[-16%] relative z-0 mb-3 shadow-sm text-4xl"
                         />
 

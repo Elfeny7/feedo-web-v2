@@ -45,7 +45,7 @@ export function PostCompose() {
 
   return (
     <div className="p-4 sm:px-6 border-b border-border flex gap-4">
-      <Avatar name={user?.name} />
+      <Avatar name={user?.name} imageUrl={user?.avatar} />
       <div className="flex-1 flex flex-col gap-3">
         <textarea
           ref={textareaRef}

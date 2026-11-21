@@ -45,7 +45,7 @@ export function CommentItem({
         onClick={() => onUserClick?.(comment.user.handle)}
         className="cursor-pointer shrink-0"
       >
-        <Avatar name={comment.user.name} />
+        <Avatar name={comment.user.name} imageUrl={comment.user.avatar} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">

@@ -1,5 +1,13 @@
 import { ResponseData, ApiError } from "@/types/api";
 
+function serializeBody(body: unknown): BodyInit | undefined {
+    if (body === undefined) return undefined;
+    if (typeof FormData !== "undefined" && body instanceof FormData) {
+        return body;
+    }
+    return JSON.stringify(body);
+}
+
 export async function baseFetcher<T = unknown>(
     endpoint: string,
     token: string | null = null,
@@ -10,8 +18,11 @@ export async function baseFetcher<T = unknown>(
     const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
     const url = `${cleanBaseUrl}${path}`;
 
+    const isFormData =
+        typeof FormData !== "undefined" && options.body instanceof FormData;
+
     const headers = new Headers(options.headers);
-    if (!headers.has("Content-Type")) {
+    if (!headers.has("Content-Type") && !isFormData) {
         headers.set("Content-Type", "application/json");
     }
     if (!headers.has("Accept")) {
@@ -61,21 +72,21 @@ export function browserClient() {
             baseFetcher<T>(endpoint, null, {
                 ...options,
                 method: "POST",
-                body: body !== undefined ? JSON.stringify(body) : undefined,
+                body: serializeBody(body),
             }),
 
         put: <T = unknown>(endpoint: string, body?: unknown, options?: RequestInit) =>
             baseFetcher<T>(endpoint, null, {
                 ...options,
                 method: "PUT",
-                body: body !== undefined ? JSON.stringify(body) : undefined,
+                body: serializeBody(body),
             }),
 
         patch: <T = unknown>(endpoint: string, body?: unknown, options?: RequestInit) =>
             baseFetcher<T>(endpoint, null, {
                 ...options,
                 method: "PATCH",
-                body: body !== undefined ? JSON.stringify(body) : undefined,
+                body: serializeBody(body),
             }),
 
         delete: <T = unknown>(endpoint: string, options?: RequestInit) =>
@@ -92,21 +103,21 @@ export function backendClient(baseUrl: string = "") {
             baseFetcher<T>(endpoint, token, {
                 ...options,
                 method: "POST",
-                body: body !== undefined ? JSON.stringify(body) : undefined,
+                body: serializeBody(body),
             }, baseUrl),
 
         put: <T = unknown>(endpoint: string, token: string | null = null, body?: unknown, options?: RequestInit) =>
             baseFetcher<T>(endpoint, token, {
                 ...options,
                 method: "PUT",
-                body: body !== undefined ? JSON.stringify(body) : undefined,
+                body: serializeBody(body),
             }, baseUrl),
 
         patch: <T = unknown>(endpoint: string, token: string | null = null, body?: unknown, options?: RequestInit) =>
             baseFetcher<T>(endpoint, token, {
                 ...options,
                 method: "PATCH",
-                body: body !== undefined ? JSON.stringify(body) : undefined,
+                body: serializeBody(body),
             }, baseUrl),
 
         delete: <T = unknown>(endpoint: string, token: string | null = null, options?: RequestInit) =>

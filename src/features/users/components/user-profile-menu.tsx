@@ -57,6 +57,7 @@ export function UserProfileMenu() {
         <div className="flex items-center gap-3">
           <Avatar
             name={user.name}
+            imageUrl={user.avatar}
             className="w-10 h-10 shadow-md text-primary-foreground bg-primary text-lg"
             fallbackClassName="bg-primary text-primary-foreground"
           />

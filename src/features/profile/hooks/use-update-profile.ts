@@ -15,6 +15,15 @@ export function useUpdateProfile(handle: string) {
             queryClient.invalidateQueries({
                 queryKey: queryKeys.users.posts(handle),
             }),
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.auth.currentUser,
+            }),
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.feed.all,
+            }),
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.comments.all,
+            }),
         ]),
     });
 }

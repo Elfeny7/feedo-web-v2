@@ -28,7 +28,11 @@ export function UserItem({ suggestedUser }: UserItemProps) {
       className="p-4 sm:px-6 border-b border-border hover:bg-muted/50 transition-colors flex items-center justify-between gap-4 cursor-pointer"
     >
       <div className="flex items-center gap-4 flex-1" onClick={handleUserClick}>
-        <Avatar name={suggestedUser.name} className="w-12 h-12 text-lg" />
+        <Avatar
+          name={suggestedUser.name}
+          imageUrl={suggestedUser.avatar}
+          className="w-12 h-12 text-lg"
+        />
         <div className="flex flex-col">
           <h2 className="font-bold hover:underline truncate">{suggestedUser.name}</h2>
           <span className="text-muted-foreground text-[15px] truncate">@{suggestedUser.handle}</span>
