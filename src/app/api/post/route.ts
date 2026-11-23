@@ -1,16 +1,21 @@
 import { NextResponse } from "next/server";
 import { backend } from "@/lib/fetcher";
 import { requestWithRefresh } from "@/lib/server/authenticated-request";
-import { ResponseData, ApiError } from "@/types/api"
-import { CreatePost } from "@/types/post"
+import { ResponseData, ApiError } from "@/types/api";
+import { CreatePost } from "@/types/post";
 
 export async function POST(request: Request) {
     try {
-        const body = await request.json();
+        const incomingFormData = await request.formData();
 
-        const responseData = await requestWithRefresh((token: string) => backend.post<CreatePost>("/posts", token, {
-            content: body.content,
-        }));
+        const responseData = await requestWithRefresh((token: string) => {
+            const outgoingFormData = new FormData();
+            incomingFormData.forEach((value, key) => {
+                outgoingFormData.append(key, value);
+            });
+
+            return backend.post<CreatePost>("/posts", token, outgoingFormData);
+        });
 
         const nextResponse = NextResponse.json(responseData);
 
@@ -29,6 +34,5 @@ export async function POST(request: Request) {
             { success: false, message: err instanceof Error ? err.message : "Internal Server Error" },
             { status: 500 }
         );
-
     }
 }

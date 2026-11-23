@@ -5,6 +5,7 @@ import type { PostData } from "@/types/post";
 import { CommentIcon, HeartIcon, MoreIcon, TrashIcon } from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { formatRelativeTime } from "@/lib/helper/format-time";
+import { PostMediaGrid } from "./post-media-grid";
 
 interface PostItemProps {
   post: PostData;
@@ -106,9 +107,14 @@ export function PostItem({
           )}
         </div>
 
-        <p className="mt-0.5 text-foreground text-[15px] leading-normal wrap-break-word">
-          {post.content}
-        </p>
+        {post.content && (
+          <p className="mt-0.5 text-foreground text-[15px] leading-normal wrap-break-word">
+            {post.content}
+          </p>
+        )}
+
+        {/* Post Media Images */}
+        <PostMediaGrid media={post.media} />
 
         {/* Post Actions */}
         <div className="flex items-center gap-6 mt-1 text-muted-foreground">

@@ -8,8 +8,13 @@ export function useCreatePost() {
 
     return useMutation({
         mutationFn: (payload: CreatePostPayload) => postsApi.createPost(payload),
-        onSuccess: () => queryClient.invalidateQueries({
-            queryKey: queryKeys.feed.all,
-        })
-    })
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.feed.all,
+            });
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.users.all,
+            });
+        },
+    });
 }

@@ -18,6 +18,7 @@ import { useFeed } from "@/features/feed/hooks/use-feed";
 import { useUserPosts } from "@/features/posts/hooks/use-user-posts";
 import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
 import { DeletePostModal } from "@/features/posts/components/delete-post-modal";
+import { PostMediaGrid } from "@/features/posts/components/post-media-grid";
 import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton";
 import { useToggleLike } from "@/features/like/hooks/use-toggle-like";
 import { CommentCompose } from "@/features/comments/components/comment-compose";
@@ -279,9 +280,14 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
           </div>
 
           {/* Post Content */}
-          <p className="text-foreground text-[17px] leading-relaxed wrap-break-word">
-            {post.content}
-          </p>
+          {post.content && (
+            <p className="text-foreground text-[17px] leading-relaxed wrap-break-word">
+              {post.content}
+            </p>
+          )}
+
+          {/* Post Media Images */}
+          <PostMediaGrid media={post.media} />
 
           {/* Post Timestamp */}
           <div className="text-sm text-muted-foreground pb-3 border-b border-border">

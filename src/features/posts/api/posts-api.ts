@@ -1,9 +1,23 @@
 import { client } from "@/lib/fetcher";
-import type { CreatePostPayload, PostCollection } from "@/types/post";
+import type { CreatePost, CreatePostPayload, PostCollection } from "@/types/post";
 
 export const postsApi = {
   getUserPosts: (handle: string, page: number) =>
     client.get<PostCollection>(`/api/users/${encodeURIComponent(handle)}/posts?page=${page}`),
-  createPost: (payload: CreatePostPayload) => client.post("/api/post", payload),
+  createPost: (payload: CreatePostPayload) => {
+    const formData = new FormData();
+
+    if (payload.content && payload.content.trim().length > 0) {
+      formData.append("content", payload.content.trim());
+    }
+
+    if (payload.media && payload.media.length > 0) {
+      payload.media.forEach((file) => {
+        formData.append("media[]", file);
+      });
+    }
+
+    return client.post<CreatePost>("/api/post", formData);
+  },
   deletePost: (postId: number) => client.delete(`/api/post/${postId}`),
 };
