@@ -22,3 +22,4 @@ export * from "./comment-icon";
 export * from "./trash-icon";
 export * from "./chevron-right-icon";
 export * from "./image-icon";
+export * from "./edit-icon";

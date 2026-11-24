@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { notFound, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import type { PostData } from "@/types/post";
 import { PostItem } from "@/features/posts/components/post-item";
+import { EditPostModal } from "@/features/posts/components/edit-post-modal";
 import { DeletePostModal } from "@/features/posts/components/delete-post-modal";
 import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
 import { Avatar } from "@/components/ui/avatar";
@@ -27,6 +29,7 @@ export function UserProfileView({ handle }: { handle: string }) {
     const router = useRouter();
     const { data: user, isLoading: isLoadingUser } = useCurrentUser();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [postToEdit, setPostToEdit] = useState<PostData | null>(null);
     const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
     const [authModal, setAuthModal] = useState<{
@@ -279,6 +282,7 @@ export function UserProfileView({ handle }: { handle: string }) {
                             post={post}
                             isOwner={Boolean(user && post.user.id === user.id)}
                             onLike={() => handleLikeClick(post.id)}
+                            onEdit={() => setPostToEdit(post)}
                             onDelete={() => setPostToDelete(post.id)}
                             onUserClick={() => {
                                 const postHandle = post.user.handle?.toLowerCase();
@@ -324,6 +328,12 @@ export function UserProfileView({ handle }: { handle: string }) {
                 onConfirm={followAction.handleUnfollowConfirm}
                 userName={profile?.name || handle}
                 isPending={followAction.isPending}
+            />
+
+            <EditPostModal
+                isOpen={postToEdit !== null}
+                post={postToEdit}
+                onClose={() => setPostToEdit(null)}
             />
 
             <DeletePostModal

@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { Avatar } from "@/components/ui/avatar";
 import {
   CommentIcon,
+  EditIcon,
   HeartIcon,
   MoreIcon,
   TrashIcon,
@@ -17,6 +18,7 @@ import { GuestActionModal, GuestAction } from "@/features/auth/components/guest-
 import { useFeed } from "@/features/feed/hooks/use-feed";
 import { useUserPosts } from "@/features/posts/hooks/use-user-posts";
 import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
+import { EditPostModal } from "@/features/posts/components/edit-post-modal";
 import { DeletePostModal } from "@/features/posts/components/delete-post-modal";
 import { PostMediaGrid } from "@/features/posts/components/post-media-grid";
 import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton";
@@ -52,6 +54,7 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
   const [showPostMenu, setShowPostMenu] = useState(false);
   const postMenuRef = useRef<HTMLDivElement>(null);
   const [isDeleted, setIsDeleted] = useState(false);
+  const [isEditPostModalOpen, setIsEditPostModalOpen] = useState(false);
   const [isDeletePostModalOpen, setIsDeletePostModalOpen] = useState(false);
   const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
 
@@ -261,7 +264,19 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
                 </button>
 
                 {showPostMenu && (
-                  <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg shadow-black/10 overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg shadow-black/10 overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-150 divide-y divide-border/60">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPostMenu(false);
+                        setIsEditPostModalOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-muted transition-colors text-foreground font-bold text-sm cursor-pointer"
+                    >
+                      <EditIcon className="w-4 h-4" />
+                      <span>Edit</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -340,6 +355,13 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
         onLikeComment={handleToggleCommentLike}
         onDeleteComment={(commentId) => setCommentToDelete(commentId)}
         onUserClick={handleNavigateUser}
+      />
+
+      {/* Edit Post Modal */}
+      <EditPostModal
+        isOpen={isEditPostModalOpen}
+        post={post ?? null}
+        onClose={() => setIsEditPostModalOpen(false)}
       />
 
       {/* Delete Post Confirmation Modal */}

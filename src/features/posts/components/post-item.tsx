@@ -2,7 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import type { PostData } from "@/types/post";
-import { CommentIcon, HeartIcon, MoreIcon, TrashIcon } from "@/components/icons";
+import {
+  CommentIcon,
+  EditIcon,
+  HeartIcon,
+  MoreIcon,
+  TrashIcon,
+} from "@/components/icons";
 import { Avatar } from "@/components/ui/avatar";
 import { formatRelativeTime } from "@/lib/helper/format-time";
 import { PostMediaGrid } from "./post-media-grid";
@@ -11,6 +17,7 @@ interface PostItemProps {
   post: PostData;
   isOwner?: boolean;
   onLike?: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
   onUserClick?: () => void;
   onPostClick?: () => void;
@@ -20,6 +27,7 @@ export function PostItem({
   post,
   isOwner = false,
   onLike,
+  onEdit,
   onDelete,
   onUserClick,
   onPostClick,
@@ -89,7 +97,19 @@ export function PostItem({
               </button>
 
               {showMenu && (
-                <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg shadow-black/10 overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-xl shadow-lg shadow-black/10 overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-150 divide-y divide-border/60">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMenu(false);
+                      onEdit?.();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-muted transition-colors text-foreground font-bold text-sm cursor-pointer"
+                  >
+                    <EditIcon className="w-4 h-4" />
+                    <span>Edit</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => {

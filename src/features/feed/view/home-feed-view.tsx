@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import type { PostData } from "@/types/post";
 import { PostItem } from "@/features/posts/components/post-item";
 import { PostItemSkeleton } from "@/features/posts/components/post-item-skeleton";
+import { EditPostModal } from "@/features/posts/components/edit-post-modal";
 import { DeletePostModal } from "@/features/posts/components/delete-post-modal";
 import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
@@ -18,6 +20,7 @@ import { PostCompose } from "@/features/feed/components/post-compose";
 export function HomeFeedView() {
   const router = useRouter();
   const { data: currentUser } = useCurrentUser();
+  const [postToEdit, setPostToEdit] = useState<PostData | null>(null);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
   const {
@@ -84,6 +87,7 @@ export function HomeFeedView() {
               post={post}
               isOwner={Boolean(currentUser && post.user.id === currentUser.id)}
               onLike={() => toggleLike(post.id)}
+              onEdit={() => setPostToEdit(post)}
               onDelete={() => setPostToDelete(post.id)}
               onUserClick={() => {
                 const postHandle = post.user.handle?.toLowerCase();
@@ -107,6 +111,12 @@ export function HomeFeedView() {
           ))
         )}
       </div>
+
+      <EditPostModal
+        isOpen={postToEdit !== null}
+        post={postToEdit}
+        onClose={() => setPostToEdit(null)}
+      />
 
       <DeletePostModal
         isOpen={postToDelete !== null}
