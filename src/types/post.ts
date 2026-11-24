@@ -27,6 +27,10 @@ export type CreatePostPayload = {
     media?: File[];
 };
 
+export type UpdatePostPayload = {
+    content: string | null;
+};
+
 export type CreatePost = {
     id: number;
     content: string | null;

@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { toast } from "react-hot-toast";
 import type { PostData } from "@/types/post";
+import { ApiError } from "@/types/api";
 import { Avatar } from "@/components/ui/avatar";
 import { ComposeButton } from "@/components/ui/compose-button";
 import { ProgressRingIcon, XIcon } from "@/components/icons";
+import { useUpdatePost } from "@/features/posts/hooks/use-update-post";
 
 const MAX_POST_LENGTH = 100;
 
@@ -13,23 +15,19 @@ export interface EditPostModalProps {
   isOpen: boolean;
   post: PostData | null;
   onClose: () => void;
-  onSave?: (postId: number, content: string) => void;
-  isPending?: boolean;
 }
 
 function EditPostModalContent({
   post,
   onClose,
-  onSave,
-  isPending = false,
 }: {
   post: PostData;
   onClose: () => void;
-  onSave?: (postId: number, content: string) => void;
-  isPending?: boolean;
 }) {
   const [content, setContent] = useState(post.content ?? "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { mutate: updatePost, isPending } = useUpdatePost();
 
   const hasMedia = Boolean(post.media && post.media.length > 0);
   const initialTrimmed = (post.content ?? "").trim();
@@ -81,12 +79,27 @@ function EditPostModalContent({
     e.preventDefault();
     if (!canSave) return;
 
-    if (onSave) {
-      onSave(post.id, currentTrimmed);
-    } else {
-      toast.success("Post updated!");
-      onClose();
-    }
+    updatePost(
+      {
+        postId: post.id,
+        payload: {
+          content: currentTrimmed.length > 0 ? currentTrimmed : null,
+        },
+      },
+      {
+        onSuccess: () => {
+          toast.success("Post updated successfully!");
+          onClose();
+        },
+        onError: (err) => {
+          toast.error(
+            err instanceof ApiError
+              ? err.message || "Failed to update post."
+              : "Failed to update post. Please try again."
+          );
+        },
+      }
+    );
   };
 
   const sortedMedia = post.media
@@ -253,8 +266,6 @@ export function EditPostModal({
   isOpen,
   post,
   onClose,
-  onSave,
-  isPending,
 }: EditPostModalProps) {
   if (!isOpen || !post) return null;
 
@@ -263,8 +274,6 @@ export function EditPostModal({
       key={`${post.id}-${post.updated_at}`}
       post={post}
       onClose={onClose}
-      onSave={onSave}
-      isPending={isPending}
     />
   );
 }

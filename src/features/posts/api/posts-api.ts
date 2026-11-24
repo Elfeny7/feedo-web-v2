@@ -1,5 +1,11 @@
 import { client } from "@/lib/fetcher";
-import type { CreatePost, CreatePostPayload, PostCollection } from "@/types/post";
+import type {
+  CreatePost,
+  CreatePostPayload,
+  PostCollection,
+  PostData,
+  UpdatePostPayload,
+} from "@/types/post";
 
 export const postsApi = {
   getUserPosts: (handle: string, page: number) =>
@@ -19,5 +25,7 @@ export const postsApi = {
 
     return client.post<CreatePost>("/api/post", formData);
   },
+  updatePost: (postId: number, payload: UpdatePostPayload) =>
+    client.put<PostData>(`/api/post/${postId}`, payload),
   deletePost: (postId: number) => client.delete(`/api/post/${postId}`),
 };
