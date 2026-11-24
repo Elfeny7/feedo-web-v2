@@ -1,5 +1,10 @@
 import { ResponseData, ApiError } from "@/types/api";
 
+const SERVER_ERROR_MESSAGE =
+    "Something went wrong on our server. Please try again later.";
+const NETWORK_ERROR_MESSAGE =
+    "Unable to connect to the server. Please try again later.";
+
 function serializeBody(body: unknown): BodyInit | undefined {
     if (body === undefined) return undefined;
     if (typeof FormData !== "undefined" && body instanceof FormData) {
@@ -32,10 +37,18 @@ export async function baseFetcher<T = unknown>(
         headers.set("Authorization", `Bearer ${token}`);
     }
 
-    const response = await fetch(url, {
-        ...options,
-        headers,
-    });
+    let response: Response;
+    try {
+        response = await fetch(url, {
+            ...options,
+            headers,
+        });
+    } catch {
+        throw new ApiError(503, NETWORK_ERROR_MESSAGE, {
+            success: false,
+            message: NETWORK_ERROR_MESSAGE,
+        });
+    }
 
     if (response.status === 204) {
         return null;
@@ -49,15 +62,24 @@ export async function baseFetcher<T = unknown>(
     }
 
     if (!response.ok) {
-        const message = responseData?.message || (response.status >= 500
-            ? "Internal Server Error"
-            : "An error occurred during the request");
+        const isServerError = response.status >= 500;
+        const message = isServerError
+            ? SERVER_ERROR_MESSAGE
+            : responseData?.message || "An error occurred during the request";
+
+        const sanitizedResponseData: ResponseData<T> = isServerError
+            ? { success: false, message: SERVER_ERROR_MESSAGE }
+            : responseData;
 
         if (response.status === 401 && typeof window !== "undefined" && token) {
-            throw new ApiError(401, message || "Authentication Error", responseData);
+            throw new ApiError(
+                401,
+                message || "Authentication Error",
+                sanitizedResponseData
+            );
         }
 
-        throw new ApiError(response.status, message, responseData);
+        throw new ApiError(response.status, message, sanitizedResponseData);
     }
 
     return responseData;
