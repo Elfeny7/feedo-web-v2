@@ -14,6 +14,10 @@ export const queryKeys = {
   feed: {
     all: ["feed"] as const,
   },
+  posts: {
+    all: ["posts"] as const,
+    detail: (postId: number) => [...queryKeys.posts.all, postId] as const,
+  },
   comments: {
     all: ["comments"] as const,
     byPost: (postId: number) => [...queryKeys.comments.all, postId] as const,

@@ -14,9 +14,9 @@ import {
 } from "@/components/icons";
 import { formatRelativeTime } from "@/lib/helper/format-time";
 import { useCurrentUser } from "@/features/auth/hooks/use-current-user";
+import { AuthGate } from "@/features/auth/components/auth-gate";
 import { GuestActionModal, GuestAction } from "@/features/auth/components/guest-action-modal";
-import { useFeed } from "@/features/feed/hooks/use-feed";
-import { useUserPosts } from "@/features/posts/hooks/use-user-posts";
+import { usePostDetail } from "@/features/posts/hooks/use-post-detail";
 import { useDeletePost } from "@/features/posts/hooks/use-delete-post";
 import { EditPostModal } from "@/features/posts/components/edit-post-modal";
 import { DeletePostModal } from "@/features/posts/components/delete-post-modal";
@@ -39,7 +39,7 @@ interface PostDetailViewProps {
 
 export function PostDetailView({ handle, postId }: PostDetailViewProps) {
   const router = useRouter();
-  const { data: currentUser } = useCurrentUser();
+  const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const isGuest = !currentUser;
 
   const [authModal, setAuthModal] = useState<{
@@ -76,18 +76,16 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
     };
   }, [showPostMenu]);
 
-  // Cari data post dari cache/query feed maupun user posts
-  const { data: feedData, isLoading: isLoadingFeed } = useFeed();
-  const { data: userPostsData, isLoading: isLoadingUserPosts } = useUserPosts(handle);
+  // Ambil detail post (otomatis gunakan cache feed/userPosts jika tersedia, atau fetch GET /api/post/[postId])
+  const {
+    data: post,
+    isLoading: isLoadingPost,
+    isError: isPostError,
+  } = usePostDetail(postId);
 
-  const feedPosts = feedData?.pages.flatMap((page) => page?.data?.data ?? []) ?? [];
-  const userPosts = userPostsData?.pages.flatMap((page) => page?.data?.data ?? []) ?? [];
-  const post =
-    feedPosts.find((p) => p.id === postId) ??
-    userPosts.find((p) => p.id === postId);
-
-  const isLoadingPost = !post && (isLoadingFeed || isLoadingUserPosts);
-  const isPostOwner = Boolean(currentUser && post && post.user.id === currentUser.id);
+  const isPostOwner = Boolean(
+    currentUser && post && post.user.id === currentUser.id
+  );
 
   const { mutate: togglePostLike } = useToggleLike();
   const {
@@ -96,7 +94,7 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
     isSuccess: isDeletePostSuccess,
   } = useDeletePost();
 
-  // Comments query & mutations
+  // Comments query hanya dijalankan jika user sudah login (!isGuest)
   const {
     data: commentsData,
     isLoading: isLoadingComments,
@@ -104,7 +102,7 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
     fetchNextPage: fetchNextComments,
     hasNextPage: hasNextComments,
     isFetchingNextPage: isFetchingNextComments,
-  } = useComments(postId);
+  } = useComments(postId, Boolean(currentUser));
 
   const { mutate: createComment, isPending: isCreatingComment } =
     useCreateComment(postId);
@@ -113,7 +111,7 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
   const { mutate: toggleCommentLike } = useToggleCommentLike();
 
   const loadMoreCommentsRef = useInfiniteScroll({
-    hasNextPage: hasNextComments,
+    hasNextPage: !isGuest && hasNextComments,
     isFetchingNextPage: isFetchingNextComments,
     fetchNextPage: fetchNextComments,
   });
@@ -121,7 +119,7 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
   // Jika loading selesai dan post tidak ditemukan (dan bukan karena baru saja dihapus oleh pemiliknya), arahkan ke halaman 404 NotFound
   if (
     !isLoadingPost &&
-    !post &&
+    (isPostError || !post) &&
     !isDeleted &&
     !isDeletingPost &&
     !isDeletePostSuccess
@@ -132,8 +130,8 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
   const comments =
     commentsData?.pages.flatMap((page) => page?.data?.data ?? []) ?? [];
   const totalComments =
-    commentsData?.pages[0]?.data?.meta?.total ??
     post?.comments_count ??
+    commentsData?.pages[0]?.data?.meta?.total ??
     comments.length;
 
   const handleNavigateUser = (targetHandle?: string) => {
@@ -332,30 +330,44 @@ export function PostDetailView({ handle, postId }: PostDetailViewProps) {
         </article>
       )}
 
-      {/* Reply / Comment Compose Box */}
-      {!isGuest && (
-        <CommentCompose
-          currentUserName={currentUser?.name}
-          currentUserAvatar={currentUser?.avatar}
-          replyingToHandle={post?.user.handle ?? handle}
-          isPending={isCreatingComment}
-          onSubmit={handleAddComment}
+      {/* Bagian Komentar: Tampilkan AuthGate untuk Guest, atau CommentCompose + CommentList untuk User Login */}
+      {isLoadingUser ? (
+        <div className="flex flex-col">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <PostItemSkeleton key={i} />
+          ))}
+        </div>
+      ) : isGuest ? (
+        <AuthGate
+          title="Log in to join the conversation"
+          description={`Sign in or create an account to read replies on ${post?.user.name || `@${handle}`}'s post and share your thoughts.`}
+          loginUrl={`/login?redirect=/${handle}/post/${postId}`}
+          registerUrl={`/register?redirect=/${handle}/post/${postId}`}
         />
-      )}
+      ) : (
+        <>
+          <CommentCompose
+            currentUserName={currentUser?.name}
+            currentUserAvatar={currentUser?.avatar}
+            replyingToHandle={post?.user.handle ?? handle}
+            isPending={isCreatingComment}
+            onSubmit={handleAddComment}
+          />
 
-      {/* Comment List */}
-      <CommentList
-        comments={comments}
-        currentUserId={currentUser?.id}
-        isLoading={isLoadingComments}
-        isError={isCommentsError}
-        hasNextPage={hasNextComments}
-        isFetchingNextPage={isFetchingNextComments}
-        loadMoreRef={loadMoreCommentsRef}
-        onLikeComment={handleToggleCommentLike}
-        onDeleteComment={(commentId) => setCommentToDelete(commentId)}
-        onUserClick={handleNavigateUser}
-      />
+          <CommentList
+            comments={comments}
+            currentUserId={currentUser?.id}
+            isLoading={isLoadingComments}
+            isError={isCommentsError}
+            hasNextPage={hasNextComments}
+            isFetchingNextPage={isFetchingNextComments}
+            loadMoreRef={loadMoreCommentsRef}
+            onLikeComment={handleToggleCommentLike}
+            onDeleteComment={(commentId) => setCommentToDelete(commentId)}
+            onUserClick={handleNavigateUser}
+          />
+        </>
+      )}
 
       {/* Edit Post Modal */}
       <EditPostModal

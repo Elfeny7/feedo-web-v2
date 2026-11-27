@@ -2,7 +2,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { commentsApi } from "@/features/comments/api/comments-api";
 import { queryKeys } from "@/lib/query-keys";
 
-export function useComments(postId: number) {
+export function useComments(postId: number, enabled: boolean = true) {
     return useInfiniteQuery({
         queryKey: queryKeys.comments.byPost(postId),
         initialPageParam: 1,
@@ -16,6 +16,7 @@ export function useComments(postId: number) {
 
             return meta.current_page + 1;
         },
+        enabled,
         staleTime: 60 * 1000,
     });
 }

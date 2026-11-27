@@ -13,6 +13,7 @@ type FeedData = InfiniteData<
 
 type ToggleLikeContext = {
     previousFeed: FeedData | undefined;
+    previousPostDetail: PostData | null | undefined;
     previousUserPosts: [
         readonly unknown[],
         FeedData | undefined,
@@ -29,16 +30,34 @@ export function useToggleLike() {
                     queryKey: queryKeys.feed.all,
                 }),
                 queryClient.cancelQueries({
+                    queryKey: queryKeys.posts.detail(postId),
+                }),
+                queryClient.cancelQueries({
                     queryKey: queryKeys.users.all,
                     predicate: (query) => query.queryKey[2] === "posts",
                 }),
-            ])
+            ]);
 
             const previousFeed = queryClient.getQueryData<FeedData>(queryKeys.feed.all);
+            const previousPostDetail = queryClient.getQueryData<PostData | null>(
+                queryKeys.posts.detail(postId)
+            );
             const previousUserPosts = queryClient.getQueriesData<FeedData>({
                 queryKey: queryKeys.users.all,
                 predicate: (query) => query.queryKey[2] === "posts",
             });
+
+            const toggleSinglePost = (post: PostData): PostData => {
+                const isLiked = !post.is_liked;
+                return {
+                    ...post,
+                    is_liked: isLiked,
+                    likes_count: Math.max(
+                        0,
+                        post.likes_count + (isLiked ? 1 : -1)
+                    ),
+                };
+            };
 
             const togglePostLike = (oldData: FeedData | undefined): FeedData | undefined => {
                 if (!oldData) return oldData;
@@ -52,27 +71,22 @@ export function useToggleLike() {
                             ...page,
                             data: {
                                 ...page.data,
-                                data: page.data.data.map((post: PostData) => {
-                                    if (post.id !== postId) return post;
-
-                                    const isLiked = !post.is_liked;
-
-                                    return {
-                                        ...post,
-                                        is_liked: isLiked,
-                                        likes_count: Math.max(
-                                            0,
-                                            post.likes_count + (isLiked ? 1 : -1)
-                                        ),
-                                    };
-                                }),
+                                data: page.data.data.map((post: PostData) =>
+                                    post.id === postId ? toggleSinglePost(post) : post
+                                ),
                             },
                         };
                     }),
                 };
-            }
+            };
 
-            queryClient.setQueryData<FeedData>(queryKeys.feed.all, (oldData) => togglePostLike(oldData));
+            queryClient.setQueryData<FeedData>(queryKeys.feed.all, (oldData) =>
+                togglePostLike(oldData)
+            );
+            queryClient.setQueryData<PostData | null>(
+                queryKeys.posts.detail(postId),
+                (oldPost) => (oldPost ? toggleSinglePost(oldPost) : oldPost)
+            );
             queryClient.setQueriesData<FeedData>(
                 {
                     queryKey: queryKeys.users.all,
@@ -81,23 +95,32 @@ export function useToggleLike() {
                 (oldData) => togglePostLike(oldData),
             );
 
-            return { previousFeed, previousUserPosts };
+            return { previousFeed, previousPostDetail, previousUserPosts };
         },
-        onError: (_error, _postId, context) => {
+        onError: (_error, postId, context) => {
             if (!context) return;
-            if (context?.previousFeed) {
+            if (context.previousFeed) {
                 queryClient.setQueryData(
                     queryKeys.feed.all,
                     context.previousFeed
+                );
+            }
+            if (context.previousPostDetail !== undefined) {
+                queryClient.setQueryData(
+                    queryKeys.posts.detail(postId),
+                    context.previousPostDetail
                 );
             }
             for (const [queryKey, previousData] of context.previousUserPosts) {
                 queryClient.setQueryData(queryKey, previousData);
             }
         },
-        onSettled: () => {
+        onSettled: (_data, _error, postId) => {
             queryClient.invalidateQueries({
                 queryKey: queryKeys.feed.all,
+            });
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.posts.detail(postId),
             });
         },
     });

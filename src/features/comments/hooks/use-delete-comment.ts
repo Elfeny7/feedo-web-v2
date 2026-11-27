@@ -13,8 +13,16 @@ export function useDeleteComment(postId?: number) {
                     ? queryKeys.comments.byPost(postId)
                     : queryKeys.comments.all,
             });
+            if (postId) {
+                queryClient.invalidateQueries({
+                    queryKey: queryKeys.posts.detail(postId),
+                });
+            }
             queryClient.invalidateQueries({
                 queryKey: queryKeys.feed.all,
+            });
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.users.all,
             });
         },
     });

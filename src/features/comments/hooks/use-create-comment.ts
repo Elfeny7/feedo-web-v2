@@ -14,7 +14,13 @@ export function useCreateComment(postId: number) {
                 queryKey: queryKeys.comments.byPost(postId),
             });
             queryClient.invalidateQueries({
+                queryKey: queryKeys.posts.detail(postId),
+            });
+            queryClient.invalidateQueries({
                 queryKey: queryKeys.feed.all,
+            });
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.users.all,
             });
         },
     });

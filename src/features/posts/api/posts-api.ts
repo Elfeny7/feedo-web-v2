@@ -10,6 +10,8 @@ import type {
 export const postsApi = {
   getUserPosts: (handle: string, page: number) =>
     client.get<PostCollection>(`/api/users/${encodeURIComponent(handle)}/posts?page=${page}`),
+  getPostDetail: (postId: number) =>
+    client.get<PostData>(`/api/post/${postId}`),
   createPost: (payload: CreatePostPayload) => {
     const formData = new FormData();
 

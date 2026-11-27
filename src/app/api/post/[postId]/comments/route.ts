@@ -3,7 +3,6 @@ import { backend } from "@/lib/fetcher";
 import { ApiError, ResponseData } from "@/types/api";
 import type { CommentCollection, CreateComment } from "@/types/comment";
 import { requestWithRefresh } from "@/lib/server/authenticated-request";
-import { getAccessToken } from "@/lib/server/get-access-token";
 
 export async function GET(
     request: Request,
@@ -12,14 +11,11 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const page = searchParams.get("page") ?? "1";
     const { postId } = await params;
-    const token = await getAccessToken();
 
     try {
-        const responseData = token
-            ? await requestWithRefresh((token: string) =>
-                backend.get<CommentCollection>(`/posts/${postId}/comments?page=${page}&per_page=5`, token)
-            )
-            : await backend.get<CommentCollection>(`/posts/${postId}/comments?page=${page}&per_page=5`);
+        const responseData = await requestWithRefresh((token: string) =>
+            backend.get<CommentCollection>(`/posts/${postId}/comments?page=${page}&per_page=5`, token)
+        );
 
         const nextResponse = NextResponse.json(responseData);
 

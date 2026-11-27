@@ -71,7 +71,7 @@ export function UserProfileView({ handle }: { handle: string }) {
     const isLoading = isLoadingUser || isLoadingProfile || isLoadingPosts;
 
     const loadMoreRef = useInfiniteScroll({
-        hasNextPage,
+        hasNextPage: !isGuest && hasNextPage,
         isFetchingNextPage,
         fetchNextPage,
     });
@@ -135,15 +135,6 @@ export function UserProfileView({ handle }: { handle: string }) {
     };
 
     const handlePostClick = (postHandle: string | undefined, postId: number) => {
-        if (isGuest) {
-            setAuthModal({
-                isOpen: true,
-                action: "post",
-                targetName: profile?.name,
-            });
-            return;
-        }
-
         const cleanHandle = postHandle?.toLowerCase();
         if (cleanHandle) {
             router.push(`/${cleanHandle}/post/${postId}`);

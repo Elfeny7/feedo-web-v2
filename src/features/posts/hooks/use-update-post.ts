@@ -14,7 +14,10 @@ export function useUpdatePost() {
             postId: number;
             payload: UpdatePostPayload;
         }) => postsApi.updatePost(postId, payload),
-        onSuccess: () => {
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({
+                queryKey: queryKeys.posts.detail(variables.postId),
+            });
             queryClient.invalidateQueries({
                 queryKey: queryKeys.feed.all,
             });
